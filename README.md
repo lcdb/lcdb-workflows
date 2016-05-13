@@ -22,16 +22,16 @@ This ensures the most isolated environment to run local tests, and most closely
 approximates the testing performed on travis-ci. If the tests pass locally,
 they should pass on travis-ci. But first you need to do some setup:
 
-Install Docker ([Mac OSX](https://docs.docker.com/mac/) or
-[Linux](https://docs.docker.com/linux/).
+1. Install Docker ([Mac OSX](https://docs.docker.com/mac/) or
+   [Linux](https://docs.docker.com/linux/)).
 
-Download the Docker container with:
+2. Download the Docker container with:
 
 ```bash
 docker pull daler/smklo
 ```
 
-Download and prepare the example data:
+3. Download and prepare the example data:
 
 ```bash
 test/get-data.sh
@@ -59,7 +59,7 @@ Some explanation of what's happening there:
 
 If you want to poke around in the container, leave off the `travis-test.sh` and
 you'll drop into a shell in the container. Note that any changes you make to
-the system (apt-get install, conda install, etc) will persist after the
+the system (apt-get install, conda install, etc) will not persist after the
 container exits.
 
 ## Setting up without Docker
