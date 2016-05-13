@@ -76,7 +76,7 @@ recommended).
 Then choose a name for your environment. Here we use `lcdb`:
 
 ```bash
-conda create -n lcdb --file requirements.txt -c bioconda -c r python=3
+conda create -n lcdb --file docker/requirements.txt -c bioconda -c r python=3
 ```
 
 This creates an isolated environment. To use it you have to temporarily activate it:
