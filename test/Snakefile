@@ -1,0 +1,5 @@
+# -*- snakemake -*-
+
+import yaml
+
+# vim: ft=python

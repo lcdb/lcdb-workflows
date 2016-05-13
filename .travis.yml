@@ -1,0 +1,15 @@
+os:
+  - linux
+
+language: c
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker pull daler/smklo
+
+script: docker run -it -v $(pwd):/opt/lcdb daler/smklo /bin/bash travis-test.sh
+
