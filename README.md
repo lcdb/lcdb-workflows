@@ -1,6 +1,8 @@
 # lcdb-workflows
 snakemake workflows for LCDB bioinformatics
 
+[![Build Status](https://travis-ci.org/lcdb/lcdb-workflows.svg?branch=master)](https://travis-ci.org/lcdb/lcdb-workflows)
+
 ## Testing
 Continuous integration testing is performed by
 [Travis-CI](https://travis-ci.org) on every push to github.
