@@ -159,3 +159,4 @@ xz=5.0.5=1
 yaml=0.1.6=0
 zlib=1.2.8=0
 snakemake=3.7.0
+fastqc
