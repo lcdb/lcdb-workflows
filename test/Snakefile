@@ -17,6 +17,7 @@ patterns = [
     'pasilla/{sample}/{sample}_R1.fastqc.html',
     'pasilla/{sample}/{sample}_R1.cutadapt.fastqc.html',
     'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz',
+    'multiqc_report.html',
 ]
 supplied = {'sample': samples}
 
@@ -75,5 +76,14 @@ rule cutadapt:
             "--overlap 10 ")
     wrapper:
         wrapper_for('cutadapt')
+
+
+rule multiqc:
+    input: filter(lambda x: 'fastq' in x, targets)
+    output: 'multiqc_report.html'
+    log: 'multiqc_report.log'
+    params: analysis_directory='pasilla'
+    wrapper:
+        wrapper_for('multiqc')
 
 # vim: ft=python
