@@ -1,6 +1,7 @@
 # -*- snakemake -*-
 
 import yaml
+import itertools
 
 samples = [
     'treated1',
@@ -19,7 +20,16 @@ patterns = [
 ]
 supplied = {'sample': samples}
 
-targets = list(map(lambda x: expand(x, **supplied), patterns))
+# Fill in each pattern with each item in "supplied", resulting in a list of
+# lists. Collapse that into a list of strings, and then unique them into a set
+# since e.g. expand('a', samples=[1, 2, 3, 4]) results in ['a', 'a', 'a', 'a']
+targets = list(
+    set(
+        itertools.chain(
+            *map(lambda x: expand(x, **supplied), patterns)
+        )
+    )
+)
 
 HERE = srcdir('')
 
