@@ -1,2 +1,3 @@
 snakemake
 fastqc
+cutadapt >=1.9.1
