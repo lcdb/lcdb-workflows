@@ -27,4 +27,6 @@ RUN mkdir /opt/lcdb
 COPY requirements.txt /tmp/
 RUN conda install -y -c bioconda -c r --file /tmp/requirements.txt
 ENV DISPLAY :0
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 WORKDIR /opt/lcdb
