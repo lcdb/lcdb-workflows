@@ -14,6 +14,7 @@ samples = [
 
 patterns = [
     'pasilla/{sample}/{sample}.fastqc.html',
+    'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz',
 ]
 supplied = {'sample': samples}
 
@@ -43,5 +44,18 @@ rule fastqc:
         zip='pasilla/{sample}/{sample}_fastqc.zip',
     wrapper:
         wrapper_for('fastqc')
+
+
+rule cutadapt:
+    input: 'pasilla/{sample}/{sample}_R1.fastq.gz'
+    output: 'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz'
+    params:
+        extra=(
+            "-a file:adapters.fa "
+            "--quality-cutoff 20 "
+            "--minimum-length 25 "
+            "--overlap 10 ")
+    wrapper:
+        wrapper_for('cutadapt')
 
 # vim: ft=python
