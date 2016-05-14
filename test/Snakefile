@@ -2,4 +2,19 @@
 
 import yaml
 
+samples = ['treated1', 'treated2', 'treated3', 'untreated1', 'untreated2', 'untreated3', 'untreated4']
+HERE = srcdir('')
+WRAPPERS = os.path.join(HERE, '../wrappers')
+
+rule all:
+    input: expand('pasilla/{sample}/{sample}.fastqc.html', sample=samples)
+
+rule fastqc:
+    input: 'pasilla/{sample}/{sample}_R1.fastq.gz'
+    output:
+        html='pasilla/{sample}/{sample}.fastqc.html',
+        zip='pasilla/{sample}/{sample}.fastqc.zip',
+    wrapper:
+        'file://{}/fastqc'.format(WRAPPERS)
+
 # vim: ft=python
