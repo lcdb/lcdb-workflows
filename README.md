@@ -42,6 +42,7 @@ test/get-data.sh
 This completes the setup. In the future, to run the tests:
 
 ```bash
+docker pull daler/smklo  # update the docker image if needed
 docker run --rm -it -v $(pwd):/opt/lcdb -u $(id -u):$(id -g) daler/smklo /bin/bash travis-test.sh
 ```
 
