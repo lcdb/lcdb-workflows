@@ -49,6 +49,7 @@ rule fastqc:
 rule cutadapt:
     input: 'pasilla/{sample}/{sample}_R1.fastq.gz'
     output: 'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz'
+    log: 'pasilla/{sample}/{sample}_R1.cutadapt.fastq.log'
     params:
         extra=(
             "-a file:adapters.fa "
