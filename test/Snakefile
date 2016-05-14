@@ -22,7 +22,7 @@ rule fastqc:
     input: 'pasilla/{sample}/{sample}_R1.fastq.gz'
     output:
         html='pasilla/{sample}/{sample}.fastqc.html',
-        zip='pasilla/{sample}/{sample}.fastqc.zip',
+        zip='pasilla/{sample}/{sample}_fastqc.zip',
     wrapper:
         wrapper_for('fastqc')
 
