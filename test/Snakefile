@@ -4,7 +4,16 @@ import yaml
 
 samples = ['treated1', 'treated2', 'treated3', 'untreated1', 'untreated2', 'untreated3', 'untreated4']
 HERE = srcdir('')
-WRAPPERS = os.path.join(HERE, '../wrappers')
+
+# relative to the directory of the current snakefile.
+WRAPPERS = '../wrappers'
+
+
+def wrapper_for(tool):
+    """
+    Returns the wrapper directory for the specified tool
+    """
+    return os.path.join(HERE, WRAPPERS, tool)
 
 rule all:
     input: expand('pasilla/{sample}/{sample}.fastqc.html', sample=samples)
@@ -15,6 +24,6 @@ rule fastqc:
         html='pasilla/{sample}/{sample}.fastqc.html',
         zip='pasilla/{sample}/{sample}.fastqc.zip',
     wrapper:
-        'file://{}/fastqc'.format(WRAPPERS)
+        wrapper_for('fastqc')
 
 # vim: ft=python
