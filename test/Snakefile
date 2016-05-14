@@ -11,6 +11,14 @@ samples = [
     #'untreated3',
     #'untreated4'
 ]
+
+patterns = [
+    'pasilla/{sample}/{sample}.fastqc.html',
+]
+supplied = {'sample': samples}
+
+targets = list(map(lambda x: expand(x, **supplied), patterns))
+
 HERE = srcdir('')
 
 # relative to the directory of the current snakefile.
@@ -23,8 +31,10 @@ def wrapper_for(tool):
     """
     return os.path.join(HERE, WRAPPERS, tool)
 
+
 rule all:
-    input: expand('pasilla/{sample}/{sample}.fastqc.html', sample=samples)
+    input: targets
+
 
 rule fastqc:
     input: 'pasilla/{sample}/{sample}_R1.fastq.gz'
