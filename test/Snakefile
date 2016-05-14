@@ -2,7 +2,15 @@
 
 import yaml
 
-samples = ['treated1', 'treated2', 'treated3', 'untreated1', 'untreated2', 'untreated3', 'untreated4']
+samples = [
+    'treated1',
+    'treated2',
+    #'treated3',
+    'untreated1',
+    'untreated2',
+    #'untreated3',
+    #'untreated4'
+]
 HERE = srcdir('')
 
 # relative to the directory of the current snakefile.
