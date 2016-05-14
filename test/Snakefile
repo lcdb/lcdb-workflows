@@ -2,19 +2,62 @@
 
 import yaml
 
-samples = ['treated1', 'treated2', 'treated3', 'untreated1', 'untreated2', 'untreated3', 'untreated4']
+samples = [
+    'treated1',
+    'treated2',
+    #'treated3',
+    'untreated1',
+    'untreated2',
+    #'untreated3',
+    #'untreated4'
+]
+
+patterns = [
+    'pasilla/{sample}/{sample}_R1.fastqc.html',
+    'pasilla/{sample}/{sample}_R1.cutadapt.fastqc.html',
+    'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz',
+]
+supplied = {'sample': samples}
+
+targets = list(map(lambda x: expand(x, **supplied), patterns))
+
 HERE = srcdir('')
-WRAPPERS = os.path.join(HERE, '../wrappers')
+
+# relative to the directory of the current snakefile.
+WRAPPERS = '../wrappers'
+
+
+def wrapper_for(tool):
+    """
+    Returns the wrapper directory for the specified tool
+    """
+    return os.path.join(HERE, WRAPPERS, tool)
+
 
 rule all:
-    input: expand('pasilla/{sample}/{sample}.fastqc.html', sample=samples)
+    input: targets
+
 
 rule fastqc:
-    input: 'pasilla/{sample}/{sample}_R1.fastq.gz'
+    input: 'pasilla/{sample}/{sample}{suffix}.fastq.gz'
     output:
-        html='pasilla/{sample}/{sample}.fastqc.html',
-        zip='pasilla/{sample}/{sample}.fastqc.zip',
+        html='pasilla/{sample}/{sample}{suffix}.fastqc.html',
+        zip='pasilla/{sample}/{sample}{suffix}_fastqc.zip',
     wrapper:
-        'file://{}/fastqc'.format(WRAPPERS)
+        wrapper_for('fastqc')
+
+
+rule cutadapt:
+    input: 'pasilla/{sample}/{sample}_R1.fastq.gz'
+    output: 'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz'
+    log: 'pasilla/{sample}/{sample}_R1.cutadapt.fastq.log'
+    params:
+        extra=(
+            "-a file:adapters.fa "
+            "--quality-cutoff 20 "
+            "--minimum-length 25 "
+            "--overlap 10 ")
+    wrapper:
+        wrapper_for('cutadapt')
 
 # vim: ft=python

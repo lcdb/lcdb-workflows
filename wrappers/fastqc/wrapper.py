@@ -33,5 +33,7 @@ shell(
     '{extra} '
     '{snakemake.input} '
 )
-shell('mv {out_zip} {snakemake.output.zip}')
-shell('mv {out_html} {snakemake.output.html}')
+if out_zip != snakemake.output.zip:
+    shell('mv {out_zip} {snakemake.output.zip}')
+if out_html != snakemake.output.html:
+    shell('mv {out_html} {snakemake.output.html}')
