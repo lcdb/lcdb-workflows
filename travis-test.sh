@@ -4,4 +4,5 @@
 # dependencies, then tries to run the test snakefile.
 
 cd test
+./get-data.sh
 snakemake
