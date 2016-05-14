@@ -10,13 +10,13 @@ try:
 except AttributeError:
     extra = ""
 if snakemake.log:
-    log = "2> {}".format(snakemake.log)
+    log = "> {} 2>&1".format(snakemake.log)
 else:
     log = ""
 shell(
     "cutadapt "
     "{extra} "
     "{snakemake.input} "
-    "> {snakemake.output[0]} "
-    "{log} "
+    "-o {snakemake.output[0]} "
+    "{log}"
 )
