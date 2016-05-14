@@ -11,7 +11,9 @@ rule all:
 
 rule fastqc:
     input: 'pasilla/{sample}/{sample}_R1.fastq.gz'
-    output: 'pasilla/{sample}/{sample}.fastqc.html'
+    output:
+        html='pasilla/{sample}/{sample}.fastqc.html',
+        zip='pasilla/{sample}/{sample}.fastqc.zip',
     wrapper:
         'file://{}/fastqc'.format(WRAPPERS)
 
