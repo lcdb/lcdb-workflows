@@ -23,8 +23,8 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     rm Miniconda3-latest-Linux-x86_64.sh
 
 ENV PATH /opt/conda/bin:$PATH
-ENV DISPLAY :0
 RUN mkdir /opt/lcdb
 COPY requirements.txt /tmp/
 RUN conda install -y -c bioconda -c r --file /tmp/requirements.txt
+ENV DISPLAY :0
 WORKDIR /opt/lcdb
