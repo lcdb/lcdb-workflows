@@ -47,6 +47,12 @@ def wrapper_for(tool):
 rule all:
     input: targets
 
+rule clean:
+    run:
+        for t in targets:
+            if os.path.exists(t):
+                shell("rm -r {t}")
+
 
 rule fastqc:
     input: 'pasilla/{sample}/{sample}{suffix}.fastq.gz'
