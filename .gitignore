@@ -3,3 +3,4 @@ __pycache__/
 *$py.class
 test/pasilla
 test/.snakemake
+test/multiqc*
