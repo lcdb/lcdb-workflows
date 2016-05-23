@@ -1,0 +1,46 @@
+$schema: http://json-schema.org/draft-04/schema#
+
+description: |
+  Configuration for LCDB workflows
+
+type: object
+properties:
+  global:
+    type: object
+    description: |
+      Settings applied to entire experiment
+    properties:
+      title:
+        type: string
+        description: title to be used in reports
+      author:
+        type: string
+        description: author to be used in reports
+      assembly:
+        type: string
+        description: assembly to use
+
+      sampleinfo:
+        type: string
+        description: |
+          Path to sample table (TODO: add format/column requirements and
+          description here)
+
+    required:
+      - assembly
+      - sampleinfo
+
+  # TODO: should there be a `workflows` with `qc`, `rnaseq`, etc keys
+  # underneath? Might be better for validation purposes.
+  workflows.qc:
+    type: object
+    description: |
+      Config for QC workflow
+    properties:
+      rules:
+        type: object
+        description: |
+          Per-rule configuration
+        default: {'align': {'aligner': 'tophat', 'index': ''}}
+required:
+  - global
