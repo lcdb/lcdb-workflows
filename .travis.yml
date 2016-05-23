@@ -9,7 +9,6 @@ services:
   - docker
 
 before_install:
-  - docker pull daler/smklo
+  - docker pull daler/lcdb-workflows
 
-script: docker run -it -v $(pwd):/opt/lcdb daler/smklo /bin/bash travis-test.sh
-
+script: docker run -it -v $(pwd):/opt/lcdb daler/lcdb-workflows /bin/bash travis-test.sh
