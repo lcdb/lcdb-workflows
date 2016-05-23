@@ -15,7 +15,7 @@ The Docker container has already been created and uploaded to
 [dockerhub](https://hub.docker.com) using the commands:
 
 ```bash
-cd docker && docker build -t daler/smklo . && docker upload daler/smklo
+cd docker && docker build -t daler/lcdb-workflows . && docker upload daler/lcdb-workflows
 ```
 
 
@@ -30,7 +30,7 @@ they should pass on travis-ci. But first you need to do some setup:
 2. Download the Docker container with:
 
 ```bash
-docker pull daler/smklo
+docker pull daler/lcdb-workflows
 ```
 
 3. Download and prepare the example data:
@@ -42,8 +42,8 @@ test/get-data.sh
 This completes the setup. In the future, to run the tests:
 
 ```bash
-docker pull daler/smklo  # update the docker image if needed
-docker run --rm -it -v $(pwd):/opt/lcdb -u $(id -u):$(id -g) daler/smklo /bin/bash travis-test.sh
+docker pull daler/lcdb-workflows  # update the docker image if needed
+docker run --rm -it -v $(pwd):/opt/lcdb -u $(id -u):$(id -g) daler/lcdb-workflows /bin/bash travis-test.sh
 ```
 
 Some explanation of what's happening there:
@@ -57,7 +57,7 @@ Some explanation of what's happening there:
 - `-u $(id -u):$(id -g)` sets the user and group of the container to the
   current user and group. This is to avoid having the container create files
   owned by root that you'd have to later chown.
-- `daler/smklo` is the name of the container
+- `daler/lcdb-workflows` is the name of the container
 - `/bin/bash travis-test.sh` runs bash as the shell and then runs the test driver script.
 
 If you want to poke around in the container, leave off the `travis-test.sh` and
