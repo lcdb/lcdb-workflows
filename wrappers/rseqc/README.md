@@ -21,7 +21,7 @@ Comprehensively evaluate high throughput sequence data, especially RNA-seq data
 	    + Background noise levels can be estimated by adding custom gene models
 5. *RPKM_saturation.py* determines the precision of estimated *Reads Per Kilobase of transcript per Million* (RPKM)
     * Estimation is performed at current sequencing depth by resampling the total mapped reads
-	* Percent relative error **(100 * |RPKM~obs~ - RPKM~real~ | / RPKM~real~)** is used to measure RPKM  
+	* Percent relative error **(100 * |RPKMp^~obs~ - RPKM^~real~ | / RPKM^~real~)** is used to measure RPKM  
 ![](https://cloud.githubusercontent.com/assets/11708268/15725749/4ba206ae-281b-11e6-9065-8264178f0aad.png)
 
 ## Basic RSeQC Modules
