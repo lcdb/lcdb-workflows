@@ -11,7 +11,7 @@ Comprehensively evaluate high throughput sequence data, especially RNA-seq data
 	* Detects structural variation or aberrant splicing in RNA-seq data
 3. *geneBody_coverage.py* scales all transcripts to 100 nt and calculates the number of reads covering each nucleotide position
     * Generates a plot illustrating the coverage profile along the gene body  
-![](https://github.com/lcdb/lcdb-workflows/wrappers/rseqc/plotA.png)
+![](https://cloud.githubusercontent.com/assets/11708268/15725008/bce81f50-2817-11e6-9b03-f205bde446f3.png)
 4. *read_distribution.py* 
 
 ## Basic RSeQC Modules
