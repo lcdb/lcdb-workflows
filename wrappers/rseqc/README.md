@@ -23,6 +23,17 @@ Comprehensively evaluate high throughput sequence data, especially RNA-seq data
     * Estimation is performed at current sequencing depth by resampling the total mapped reads
 	* Percent relative error **(100 * |RPKMp<sub>obs</sub> - RPKM<sub>real</sub> | / RPKM<sub>real</sub>)** is used to measure RPKM  
 ![](https://cloud.githubusercontent.com/assets/11708268/15725749/4ba206ae-281b-11e6-9065-8264178f0aad.png)
+6. *junction_saturation.py* determines if the current sequencing depth is sufficient to perform alternative splicing analysis
+    * Similar to **RPKM_saturation.py** where the splice junctions are detected for each resampled subset of reads
+		+ Number of detected splice junctions will increase as the resample percentage increases 
+		+ Eventually the resample percentage will reach a fixed value
+	* Very important tool for alternative splicing analysis to ensure saturated sequencing depth  
+![](https://cloud.githubusercontent.com/assets/11708268/15746372/49616932-28a4-11e6-9aee-725ee306ac28.png)
+7. *infer_experiment.py* used to speculate the experimental design of the samples
+    * Samples a subset of the reads from the BAM file and compares it to a reference gene model
+		+ Determines if the RNA-seq has been sequenced with paired-end or single-end reads
+		+ Also detects if sequencing is strand-specific and how the reads are stranded
+
 
 ## Basic RSeQC Modules
 * Sequence quality
