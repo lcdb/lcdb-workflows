@@ -14,6 +14,9 @@ format and it will give you the following information:
 
 ## Basic Usage
 
+*sort*: preseq requires a sorted BED or BAM file (recommend BED)
+<pre><code>$ sort -k 1,1 -k 2,2n -k 3,3n -k 6,6 input.bed > input.sort.bed</code></pre>
+
 *c_curve*: generates a complexity plot of the genomic library
 in BED or BAM format
 <pre><code>$ ./preseq c_curve -o complexity_output.txt input.bed</code></pre>
