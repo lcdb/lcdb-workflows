@@ -24,7 +24,7 @@ in BED or BAM format
 *lc_extrap*: estimate the future yield of a genomic library using an initial experiment
 <pre><code>$ ./preseq lc_extrap -o future_yield.txt input.bed</code></pre>
 
-*bam2mr*: converts bam (sorted) to mr (recommended before running *gc_extrap*)
+*bam2mr*: converts bam (sorted) to nr (recommended before running *gc_extrap*)
 <pre><code>$ ./bam2mr sorted.bam > sorted.nr</code></pre>
 
 *gc_extrap*: predicts the genomic coverage from deep sequencing based on the initial sample
