@@ -24,6 +24,5 @@ in BED or BAM format
 *gc_extrap*: predicts the genomic coverage from deep sequencing based on the initial sample
 <pre><code>$ ./preseq gc_extrap -o future_coverage.txt input.mr</code></pre>
 
-<p>
+
 **Note**: for additional information please refer to the [manual](http://smithlabresearch.org/wp-content/uploads/manual.pdf)
-</p>
