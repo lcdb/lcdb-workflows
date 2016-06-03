@@ -1,0 +1,29 @@
+# Preseq
+
+*preseq* is an empirical Bayes method for predicting the 
+molecular complexity of sequencing libraries or samples
+on the basis of data from very shallow sequencing runs.
+
+*In english*: provide preseq with either a **BED** or **BAM**
+format and it will give you the following information:
+<ul>
+<li>yield estimates from experiment and subsampled experiments</li>
+<li>predicted yield estimates from additional sequencing</li>
+<li>predict the genomic coverage given current reads</li>
+</ul>
+
+## Basic Usage
+
+*c_curve*: generates a complexity plot of the genomic library
+in BED or BAM format
+<pre><code>$ ./preseq c_curve -o complexity_output.txt input.bed</code></pre>
+
+*lc_extrap*: estimate the future yield of a genomic library using an initial experiment
+<pre><code>$ ./preseq lc_extrap -o future_yield.txt input.bed</code></pre>
+
+*gc_extrap*: predicts the genomic coverage from deep sequencing based on the initial sample
+<pre><code>$ ./preseq gc_extrap -o future_coverage.txt input.mr</code></pre>
+
+<p>
+**Note**: for additional information please refer to the [manual](http://smithlabresearch.org/wp-content/uploads/manual.pdf)
+</p>

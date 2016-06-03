@@ -1,0 +1,8 @@
+# Preseq
+
+*preseqR* is an empirical Bayes method for predicting the 
+molecular complexity of sequencing libraries or samples
+on the basis of data from very shallow sequencing runs.
+
+preseqR.interpolate.distinct
+============================
