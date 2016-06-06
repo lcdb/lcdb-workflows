@@ -32,15 +32,25 @@ properties:
 
   # TODO: should there be a `workflows` with `qc`, `rnaseq`, etc keys
   # underneath? Might be better for validation purposes.
-  workflows.qc:
+  workflows:
     type: object
-    description: |
-      Config for QC workflow
     properties:
-      rules:
+      qc:
         type: object
         description: |
-          Per-rule configuration
-        default: {'align': {'aligner': 'tophat', 'index': ''}}
+          Quality control workflow configuration
+        properties:
+          type: object
+          description: |
+            Config for QC workflow
+          properties:
+            rules:
+              type: object
+              description: |
+                Per-rule configuration
+              default: {'align': {'aligner': 'tophat', 'index': ''}}
+
+
+
 required:
   - global
