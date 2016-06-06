@@ -1,0 +1,36 @@
+dm6:
+  gtf:
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/gtf/dmel-all-r6.11.gtf.gz'
+    postprocess: "dm6.gtf_postprocess"
+    conversions:
+      - intergenic
+      - dexseq
+      - astalavista
+
+  fasta:
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-chromosome-r6.11.fasta.gz'
+    postprocess: "dm6.fasta_postprocess"
+    indexes:
+      - bowtie2
+      - hisat2
+      # - star
+  transcriptome:
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-transcript-r6.11.fasta.gz'
+    indexes:
+      - kallisto
+
+hg19:
+  fasta:
+    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/chromFa.tar.gz'
+
+ecoli:
+  fasta:
+    url: 'ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.fna.gz'
+    indexes:
+        - bowtie2
+
+wolbachia:
+    fasta:
+        url: 'ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF_000008025.1_ASM802v1/GCF_000008025.1_ASM802v1_genomic.fna.gz'
+        indexes:
+            - bowtie2
