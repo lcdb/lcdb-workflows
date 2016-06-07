@@ -28,7 +28,22 @@ in BED or BAM format
 <pre><code>$ ./bam2mr sorted.bam > sorted.nr</code></pre>
 
 *gc_extrap*: predicts the genomic coverage from deep sequencing based on the initial sample
-<pre><code>$ ./preseq gc_extrap -o future_coverage.txt input.mr</code></pre>
+<pre><code>$ ./preseq gc_extrap -o future_coverage.txt sorted.nr</code></pre>
 
 
 **Note**: for additional information please refer to the [manual](http://smithlabresearch.org/wp-content/uploads/manual.pdf)
+
+## Example
+
+<pre><code>
+rule preseq:
+input: 
+bed='samples/{sample}.bed'
+output:
+c_curve='samples/{sample}_complexity_output.txt'
+lc_curve='samples/{sample}_future_yield.txt'
+gc_extrap='samples/{sample}_future_coverage.txt'
+params:
+
+
+</code></pre>
