@@ -22,13 +22,13 @@
 ## Example
 Include the example Snakemake rule in <code>code</code> form, see example below:
 <pre><code>
-rule multiqc
-    input: expand('samples/{sample}{suffix}', sample=samples, suffix=['_fastqc.zip', '.cutadapt.log'])
+rule samtools_index:
+    input: 
+		"mapped/{sample}.sorted.bam"
     output:
-        html='multiqc_report.html'
+        "mapped/{sample}.sorted.bam.bai"
     params:
-        analysis_directory='samples'
-        extra="--config=multiqc_config.yaml"
+        "optional params string"
     wrapper:
-        "file://path/to/multiqc"
+        "/path/to/wrapper/location"
 </code></pre>
