@@ -1,0 +1,141 @@
+$schema: http://json-schema.org/draft-04/schema#
+
+type: object
+description: |
+  Defines sources of sequences and annotations. The references, annotations,
+  and indexes specified here will be built in subdirectories of the data dir.
+
+definitions:
+  index:
+    type: string
+
+    # New aligners supported? Add them here.
+    enum:
+      - bowtie2
+      - hisat2
+      - kallisto
+
+  conversion:
+    type: string
+
+    # New conversion methods available? Add them here.
+    enum:
+      - intergenic
+
+  assemblyobj:
+    type: object
+    properties:
+      assembly:
+        type: string
+        description: Assembly label. Output will go in {data_dir}/{assembly}
+        default: dm6
+      fasta:
+        type: object
+        description: |
+          Genome fasta file. Expected to be gzipped; if not then use
+          a postprocess hook to fix it.
+        properties:
+          tag:
+            type: string
+            description: |
+              Tag for this fasta file. Can be used to differentiate versions;
+              default final output will be
+              {data_dir}/{assembly}/{assembly}.fa.gz but if tag is specified,
+              then it will be {data_dir}/{assembly}/{assembly}.{tag}.fa.gz
+          url:
+            type: string
+            description: URL to genome fasta file.
+            default: "'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-chromosome-r6.11.fasta.gz'"
+          postprocess:
+            type: string
+            description: |
+              Optional dotted-name syntax indicating a module and function to
+              use in order to convert the file downloaded from the URL into
+              a well-formatted gzipped FASTA file ready for indexing.
+            default: "dm6.fasta_postprocess"
+          indexes:
+            type: array
+            description: Build indexes for these aligners
+            items:
+              $ref: '#/definitions/index'
+            default:
+              - bowtie2
+              - hisat2
+      gtf:
+        type: object
+        description: |
+          Gene annotations file in GTF format. Expected to be gzipped; if not
+          then use a postprocess hook to fix it.
+        properties:
+          tag:
+            type: string
+            description: |
+              Tag for this gtf file. Can be used to differentiate versions;
+              default final output will be
+              {data_dir}/{assembly}/{assembly}.gtf.gz but if tag is specified,
+              then it will be {data_dir}/{assembly}/{assembly}.{tag}.gtf.gz
+          url:
+            type: string
+            description: URL to GTF file
+            default: "'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/gtf/dmel-all-r6.11.gtf.gz'"
+          postprocess:
+            type: string
+            description: |
+              Optional dotted-name syntax indicating a module and function to
+              use in order to convert the file downloaded from the URL into
+              a well-formatted gzipped GTF file ready for downstream
+              conversions or analysis.
+            default: dm6.gtf_postprocess
+          conversions:
+            type: array
+            description: |
+              Perform these conversions upon the GTF file.
+            items:
+                $ref: '#/definitions/conversion'
+            default:
+              - intergenic
+
+      transcriptome:
+        type: object
+        description: |
+          Transcriptome fasta. Expected to be gzipped; if not then use
+          a postprocess hook to fix it.
+        properties:
+          tag:
+            type: string
+            description: |
+              Tag for this gtf file. Can be used to differentiate versions;
+              default final output will be
+              {data_dir}/{assembly}/{assembly}.transcriptome.fa.gz but if tag
+              is specified, then it will be
+              {data_dir}/{assembly}/{assembly}.{tag}.transcriptome.fa.gz
+          url:
+            type: string
+            description: URL to transcriptome fasta file
+            default: "'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-transcript-r6.11.fasta.gz'"
+          postprocess:
+            type: string
+            description: |
+              Optional dotted-name syntax indicating a module and function to
+              use in order to convert the file downloaded from the URL into
+              a well-formatted gzipped FASTA file where record names are
+              transcript IDs, ready for indexing.
+            default: None
+          indexes:
+            type: array
+            description: Build indexes for these aligners
+            items:
+              $ref: '#/definitions/index'
+            default: [kallisto]
+
+properties:
+  assemblies:
+    type: array
+    description: "assembly blocks"
+    items:
+      $ref: "#/definitions/assemblyobj"
+  data_dir:
+    type: string
+    description: |
+      Top-level directory. A subdirectory named after each configured assembly
+      will be created here and all generated files will go in that subdirectory.
