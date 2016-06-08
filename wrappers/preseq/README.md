@@ -43,7 +43,5 @@ output:
 c_curve='samples/{sample}_complexity_output.txt'
 lc_curve='samples/{sample}_future_yield.txt'
 gc_extrap='samples/{sample}_future_coverage.txt'
-params:
-
 
 </code></pre>
