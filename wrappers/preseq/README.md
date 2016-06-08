@@ -47,4 +47,8 @@ gc_extrap='samples/{sample}_future_coverage.txt'
 </code></pre>
 
 Branch Testing
+<<<<<<< HEAD
 Testing
+=======
+Will This conflict?
+>>>>>>> testing
