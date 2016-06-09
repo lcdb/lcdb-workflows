@@ -1,6 +1,6 @@
 # Wrapper for Preseq c_curve
 
-A method of Preseq that generates a complexity plot of the genome library based on observed data.
+Preseq method that generates a complexity plot of the genome library based on observed data.
 
 ## Input
 * BAM/BED: *Sorted* according to chromosome and start position
