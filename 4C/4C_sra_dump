@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo "Type in a directory you want the SRA files to be saved under, followed by [ENTER]: "
+
+read location
+cd $location
+
+# using 'SRA Toolkit' www.ncbi.nlm.nih.gov/Traces/sra/?view=software
+fastq-dump SRR3148439 -A cd83_1
+fastq-dump SRR3148440 -A cd83_2
