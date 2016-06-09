@@ -167,6 +167,21 @@ def create_config(schema, genome, site_file, context=None, fout=None):
     def props(path, v, fout=None, print_key=True):
         """
         Recursively print out a filled-in config file based on the schema
+
+        Parameters
+        ----------
+        path : list
+            List of keys to access from `v`
+
+        v : dict
+            Dictionary from which to access `path`
+
+        fout : file handle
+            Output will be written here
+
+        print_key : boolean
+
+
         """
 
         # Set the full original and output file objects, but only on the first
@@ -174,6 +189,7 @@ def create_config(schema, genome, site_file, context=None, fout=None):
         try:
             props.orig
         except AttributeError:
+            # so now we can always access the full original YAML dict
             props.orig = v
 
         try:
@@ -181,14 +197,20 @@ def create_config(schema, genome, site_file, context=None, fout=None):
         except AttributeError:
             props.out = fout
 
-        # Key into schema
+        # Key into schema. If a path is provided, we start with the last one.
         if path:
             k = path[-1]
         else:
             k = None
 
+        # First thing to do is write the comments for whatever value we're on.
+        # This will include the description field (if provided) as well as any
+        # enum options. Much of the complexity here is in making the comments
+        # be indented at the proper level, which is tracked by the `level`
+        # attribute of the function
+
         def wrap(s):
-            "wrap a string at the current indent level"
+            "wrap a comment string at the current indent level"
             return ("\n%s# " % (indent)).join(_wrap(s))
 
         indent = '  ' * props.level
@@ -204,10 +226,13 @@ def create_config(schema, genome, site_file, context=None, fout=None):
                 '{indent}# options for "{k}" are:\n{enum}\n'
                 .format(**locals()))
 
-        # Fill in the default, if provided. If "use_site" key exists, override
-        # any defaults with the corresponding entry in site.yaml.
-        # "Corresponding" means having the same "path" of keys, with 'genome'
-        # prepended. So if the schema has an entry like::
+        default = v.get('default')
+
+        # If "use_site" key exists, override any defaults with the
+        # corresponding entry in site.yaml.  "Corresponding" means having the
+        # same "path" of keys, with 'genome' prepended. So if the schema has an
+        # entry like::
+        #
         #   dm6:
         #       indexes:
         #           bowtie:
@@ -221,15 +246,19 @@ def create_config(schema, genome, site_file, context=None, fout=None):
         #
         #   site['dm6']['indexes']['bowtie']
         #
-        default = v.get('default')
+        #
+        # If "use_context" is True, then we assume that this key was passed in
+        # as part of the parent function and is available in the current
+        # context dictionary.
         if v.get('use_site'):
             default = access(site, [genome] + path)
         if v.get('use_context'):
             default = context[k]
 
-        # Create an appropriate prefix. This avoids trailing spaces for keys
-        # with no value; this also sets strings with no default to "" instead
-        # of a blank space.
+        # Create an appropriate prefix to be inserted right after the ":". This
+        # avoids trailing spaces for keys with no value; this also sets strings
+        # with no default to the empty string  "" instead of a blank space
+        # (since a blank space would fail string validation).
         prefix = " "
         if default is None:
             if v['type'] == "string":
@@ -258,22 +287,36 @@ def create_config(schema, genome, site_file, context=None, fout=None):
         props.out.write(
             '{indent}{k}{colon}{prefix}{default}\n'.format(**locals()))
 
-        # Recursively call this function for everything in properties
+        # Recursively call this function for everything in properties.
+        # These are the only things that are printed to the output YAML;
+        # everything else is only used for schema validation.
         if 'properties' in v:
             for k, v in v['properties'].items():
+
+                # indent the next output by one level
                 props.level += 1
+
+                # stick the key onto the end of the path
                 path.append(k)
+
+                # recursively call
                 props(path, v)
+
+                # now we back out, decreasing the indent level and removing the
+                # key we just provided.
                 props.level -= 1
                 path.pop()
 
         # Follow references if needed for an array
         if v['type'] == 'array':
             if 'default' not in v:
+
+                # TODO: is this really needed?
                 props.level += 1
                 props.out.write('%s-' % ('  ' * props.level))
                 props.level -= 1
 
+                # TODO: should follow $ref for non-array items as well.
                 if '$ref' in v['items']:
                     props.level += 1
                     props(path,
