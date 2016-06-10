@@ -27,32 +27,36 @@ def resolve_name(name):
         obj = getattr(obj, part)
     return obj
 
+d = {}
+for i in config['references']:
+    try:
+        tag = i['tag']
+    except KeyError:
+        tag = 'default'
+    d[(i['assembly'], tag)] = i
 
-def download_and_postprocess(assembly, field, outfile):
-    """
-    For the given assembly (dm6, hg19, etc) and field (gtf, fasta, etc) and
-    desired output file, download the specified URL for the field to a temp
-    file and apply the specified post-processing function (if any).
 
-    The temp file is named after the output file; if the output file ends with
-    .gz then the temp file will so as to not confuse other tools.
-
-    This provides a mechanism for general downloading across assemblies while
-    also allowing a sort of plugin customization option.
-    """
-
+def download_and_postprocess(outfile):
     def default_postprocess(origfn, newfn):
         """
         If no other postprocess function is defined, then simply move the original
         to the new.
         """
         shell("mv {origfn} {newfn}")
-    name = config[assembly][field].get('postprocess', None)
+
+    base = os.path.relpath(outfile, config['data_dir'])
+    assembly = os.path.basename(os.path.dirname(base))
+    basename = os.path.basename(outfile)
+
+    tag = basename.split('_', 1)[-1].split('.')[0]
+    block = d[(assembly, tag)]
+
+    name = block.get('postprocess', None)
     if name is None:
         func = default_postprocess
     else:
         func = resolve_name(name)
-    url = config[assembly][field]['url']
+    url = block['url']
     if outfile.endswith('.gz'):
         gz = '.gz'
     else:
@@ -60,42 +64,38 @@ def download_and_postprocess(assembly, field, outfile):
     shell("wget {url} -O- > {outfile}.tmp{gz}")
     func(outfile + '.tmp' + gz, outfile)
 
-ext_mapping = {
-    'gtf': '.gtf.gz',
-    'fasta': '.fa',
-    'transcriptome': '.transcriptome.fa',
-}
+
+if not os.path.exists(config['data_dir']):
+    os.makedirs(config['data_dir'])
+
+workdir: config['data_dir']
 
 # Build the targets based on what's in the config file, rather than assume
 # we want to build everything.
+ext_mapping = {
+    'gtf': '.gtf.gz',
+    'fasta': '.fa.gz',
+}
+index_mapping = {
+    'bowtie2': ('{assembly}/bowtie2/{assembly}{tag}.{n}.bt2', dict(n=[1, 2, 3, 4])),
+    'hisat2': ('{assembly}/hisat2/{assembly}{tag}.{n}.ht2', dict(n=range(1, 9))),
+    'kallisto': ('{assembly}/kallisto/{assembly}{tag}.idx', dict()),
+}
 targets = []
-for assembly, d in config.items():
-    for key in d.keys():
-
-        # TODO: eventually we'll want to add targets for DEXSeq, intergenic,
-        # and astalavista variants
-        if key == 'gtf':
-            targets.append('{assembly}/{assembly}.gtf.gz'.format(assembly=assembly))
-
-        if key == 'transcriptome':
-            targets.append('{assembly}/{assembly}.transcriptome.fa.gz'.format(assembly=assembly))
-            for index in d['transcriptome'].get('indexes', []):
-                if index == 'kallisto':
-                    targets.append('{assembly}/kallisto/{assembly}.transcriptome.idx'.format(assembly=assembly))
-                else:
-                    raise ValueError("transcriptome index %s not currently supported" % index)
-
-        if key == 'fasta':
-            targets.append(
-                '{assembly}/{assembly}.fa.gz'.format(
-                    assembly=assembly, ext=ext_mapping[key]))
-            for index in d['fasta'].get('indexes', []):
-                if index == 'bowtie2':
-                    targets += expand('{assembly}/bowtie2/{assembly}.{n}.bt2', assembly=assembly, n=[1, 2, 3, 4])
-                elif index == 'hisat2':
-                    targets += expand('{assembly}/hisat2/{assembly}.{n}.ht2', assembly=assembly, n=range(1, 9))
-                else:
-                    raise ValueError("fasta index %s not currently supported" % index)
+for block in config['references']:
+    try:
+        tag = '_' + block['tag']
+    except KeyError:
+        tag = '_default'
+    ext = ext_mapping[block['type']]
+    assembly = block['assembly']
+    targets.append('{assembly}/{assembly}{tag}{ext}'.format(**locals()))
+    if block['type'] == 'fasta':
+        indexes = block.get('indexes', [])
+        for index in indexes:
+            pattern, kwargs = index_mapping[index]
+            kwargs = kwargs.copy()
+            targets.extend(expand(pattern, assembly=assembly, tag=tag,  **kwargs))
 
 
 rule all:
@@ -105,51 +105,45 @@ rule all:
 # post-processing functions to be specified in the config file.
 
 rule download_fasta:
-    output: '{assembly}/{assembly}.fa.gz'
+    output: '{assembly}/{assembly}{tag}.fa.gz'
     run:
-        download_and_postprocess(wildcards.assembly, 'fasta', output[0])
+        download_and_postprocess(output[0])
 
 rule unzip_fasta:
     input: rules.download_fasta.output
-    output: temporary('{assembly}/{assembly}.fa')
+    output: temporary('{assembly}/{assembly}{tag}.fa')
     shell: 'gunzip -c {input} > {output}'
 
 rule download_gtf:
-    output: '{assembly}/{assembly}.gtf.gz'
+    output: '{assembly}/{assembly}{tag}.gtf.gz'
     run:
-        download_and_postprocess(wildcards.assembly, 'gtf', output[0])
-
-
-rule download_transcriptome:
-    output: '{assembly}/{assembly}.transcriptome.fa.gz'
-    run:
-        download_and_postprocess(wildcards.assembly, 'transcriptome', output[0])
+        download_and_postprocess(output[0])
 
 
 rule bowtie_index:
-    output: expand('{{assembly}}/bowtie2/{{assembly}}.{n}.bt2', n=[1, 2, 3, 4])
+    output: expand('{{assembly}}/bowtie2/{{assembly}}{{tag}}.{n}.bt2', n=[1, 2, 3, 4])
     input: rules.unzip_fasta.output
-    log: '{assembly}/bowtie2/{assembly}.log'
+    log: '{assembly}/bowtie2/{assembly}{tag}.log'
     shell:
         '''
-        bowtie2-build {input} {wildcards.assembly}/bowtie2/{wildcards.assembly} > {log} 2> {log}
+        bowtie2-build {input} {wildcards.assembly}/bowtie2/{wildcards.assembly}{wildcards.tag} > {log} 2> {log}
         '''
 
 
 rule hisat2_index:
-    output: expand('{{assembly}}/hisat2/{{assembly}}.{n}.ht2', n=range(1, 9))
-    log: '{assembly}/hisat2/{assembly}.log'
+    output: expand('{{assembly}}/hisat2/{{assembly}}{{tag}}.{n}.ht2', n=range(1, 9))
+    log: '{assembly}/hisat2/{assembly}{tag}.log'
     input: rules.unzip_fasta.output
     shell:
         '''
-        hisat2-build {input} {wildcards.assembly}/hisat2/{wildcards.assembly} > {log} 2> {log}
+        hisat2-build {input} {wildcards.assembly}/hisat2/{wildcards.assembly}{wildcards.tag} > {log} 2> {log}
         '''
 
 
 rule kallisto_index:
-    output: '{assembly}/kallisto/{assembly}.transcriptome.idx'
-    input: '{assembly}/{assembly}.transcriptome.fa.gz'
-    log: '{assembly}/kallisto/{assembly}.log'
+    output: '{assembly}/kallisto/{assembly}{tag}.idx'
+    input: '{assembly}/{assembly}{tag}.fa.gz'
+    log: '{assembly}/kallisto/{assembly}{tag}.log'
     shell:
         '''
         kallisto index -i {output} --make-unique {input} > {log} 2> {log}
