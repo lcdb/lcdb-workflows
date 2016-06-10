@@ -114,6 +114,7 @@ rule hisat2:
     wrapper:
         wrapper_for('hisat2')
 
+"""
 rule preseq_ccurve:
     input:
         sortBAM='{sample}.sorted.bam'
@@ -124,4 +125,4 @@ rule preseq_ccurve:
         output='-o'
     wrapper:
         wrapper_for('preseq/observed_complexity')
-
+"""
