@@ -24,7 +24,7 @@ rule preseq_lcextrap:
     output:
         complexOut='future_yield.txt'
     params:
-        BAM='-B'
+        BAM='-B',
 		output='-o'
     wrapper:
         "file://path/to/preseq/estimated_complexity"

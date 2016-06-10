@@ -24,7 +24,7 @@ rule preseq_ccurve:
     output:
         complexOut='complexity_output.txt'
     params:
-        BAM='-B'
+        BAM='-B',
 		output='-o'
     wrapper:
         "file://path/to/preseq/observed_complexity"
