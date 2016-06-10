@@ -22,11 +22,11 @@ Threads not supported.
 <pre><code>
 rule preseq_ccurve:
     input: 
-		"mapped/{sample}.sorted.bam"
+		"{sample}.sorted.bam"
     output:
-        "mapped/future_coverage.txt"
+        "future_coverage.txt"
     params:
-        "-o"
+        output='-o'
     wrapper:
         "file://path/to/preseq/estimated_coverage"
 </code></pre>
