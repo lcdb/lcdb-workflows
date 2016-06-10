@@ -3,6 +3,7 @@ __copyright__ = "Copyright 2016, Behram Radmanesh"
 __email__ = "behram.radmanesh@nih.gov"
 __license__ = "MIT"
 
+# import os to allow snakemake 
 # import snakemake's ability to execute shell commands
 from snakemake.shell import shell
 
