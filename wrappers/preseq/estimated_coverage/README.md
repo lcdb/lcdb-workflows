@@ -20,13 +20,13 @@ Threads not supported.
 
 ## Example
 <pre><code>
-rule preseq_ccurve:
+rule preseq_gcurve:
     input: 
-		"mapped/{sample}.sorted.bam"
+		sortedBAM="{sample}.sorted.bam"
     output:
-        "mapped/future_coverage.txt"
+        futureCov="future_coverage.txt"
     params:
-        "-o"
+        output='-o'
     wrapper:
         "file://path/to/preseq/estimated_coverage"
 </code></pre>

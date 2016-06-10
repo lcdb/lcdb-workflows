@@ -114,4 +114,15 @@ rule hisat2:
     wrapper:
         wrapper_for('hisat2')
 
-# vim: ft=python
+"""
+rule preseq_ccurve:
+    input:
+        sortBAM='{sample}.sorted.bam'
+    output:
+        complexOut='complexity_output.txt'
+    params:
+        BAM='-B'
+        output='-o'
+    wrapper:
+        wrapper_for('preseq/observed_complexity')
+"""
