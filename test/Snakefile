@@ -79,8 +79,19 @@ rule cutadapt:
         wrapper_for('cutadapt')
 
 
+def multiqc_inputs():
+    inputs = []
+    check_for = ['fastq', 'bam']
+    for i in targets:
+        for j in check_for:
+            if j in i:
+                inputs.append(i)
+                break
+    return inputs
+
+
 rule multiqc:
-    input: filter(lambda x: 'fastq' in x, targets)
+    input: multiqc_inputs()
     output: 'multiqc_report.html'
     log: 'multiqc_report.log'
     params: analysis_directory='pasilla'
