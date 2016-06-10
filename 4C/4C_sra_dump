@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
 
 echo "Type in a directory you want the SRA files to be saved under, followed by [ENTER]: "
 
