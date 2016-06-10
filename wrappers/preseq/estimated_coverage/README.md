@@ -20,11 +20,11 @@ Threads not supported.
 
 ## Example
 <pre><code>
-rule preseq_ccurve:
+rule preseq_gcurve:
     input: 
-		"{sample}.sorted.bam"
+		sortedBAM="{sample}.sorted.bam"
     output:
-        "future_coverage.txt"
+        futureCov="future_coverage.txt"
     params:
         output='-o'
     wrapper:

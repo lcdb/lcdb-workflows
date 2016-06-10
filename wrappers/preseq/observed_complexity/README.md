@@ -22,7 +22,7 @@ rule preseq_ccurve:
     input: 
 		sortBAM='{sample}.sorted.bam'
     output:
-        complexOut='complexity_output.txt"
+        complexOut='complexity_output.txt'
     params:
         BAM='-B'
 		output='-o'
