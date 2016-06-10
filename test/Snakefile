@@ -87,9 +87,9 @@ rule multiqc:
     wrapper:
         wrapper_for('multiqc')
 
+# TODO: this will eventually be supplied by the config system.
 data_dir = '/data/LCDB/references'
 assembly = 'dm6'
-
 rule hisat2:
     input:
         index=expand('{data_dir}/{assembly}/hisat2/dm6_default.{n}.ht2',
@@ -97,9 +97,8 @@ rule hisat2:
         fastq='pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz'
     output:
         'pasilla/{sample}/{sample}.cutadapt.hisat2.bam'
-    log: 'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz'
-    params:
-        prefix='{data_dir}/{assembly}/hisat2/dm6_default'.format(data_dir=data_dir, assembly=assembly)
+    log: 'pasilla/{sample}/{sample}.cutadapt.hisat2.bam.log'
+    params: extra="--max-intronlen 50000"
     threads: 8
     wrapper:
         wrapper_for('hisat2')
