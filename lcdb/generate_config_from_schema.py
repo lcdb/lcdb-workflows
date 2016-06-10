@@ -221,10 +221,11 @@ def create_config(schema, genome, site_file, context=None, fout=None):
 
         # Describe the possible values of any enums.
         if 'enum' in v:
-            enum = '\n'.join(['%s# - "%s"' % (indent, i) for i in v['enum']])
-            props.out.write(
-                '{indent}# options for "{k}" are:\n{enum}\n'
-                .format(**locals()))
+            if len(v['enum']) > 1:
+                enum = '\n'.join(['%s# - "%s"' % (indent, i) for i in v['enum']])
+                props.out.write(
+                    '{indent}# options for "{k}" are:\n{enum}\n'
+                    .format(**locals()))
 
         default = v.get('default')
 
