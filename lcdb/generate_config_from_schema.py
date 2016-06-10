@@ -326,6 +326,20 @@ def create_config(schema, genome, site_file, context=None, fout=None):
                           print_key=False)
                     props.level -= 1
 
+                if 'anyOf' in v['items']:
+                    print("anyOf")
+                    for i, b in enumerate(v['items']['anyOf']):
+                        if i > 0:
+                            props.level += 1
+                            props.out.write('%s-' % ('  ' * props.level))
+                            props.level -= 1
+                        props.level += 1
+                        props(path,
+                              follow_ref(b['$ref'],
+                                         props.orig),
+                              print_key=False)
+                        props.level -= 1
+
         return
 
     # Set the default level and then recursively call props to generate the
