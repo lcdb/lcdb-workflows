@@ -18,6 +18,7 @@ patterns = [
     'pasilla/{sample}/{sample}_R1.cutadapt.fastqc.html',
     'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz',
     'multiqc_report.html',
+    'pasilla/{sample}/{sample}.cutadapt.hisat2.bam'
 ]
 supplied = {'sample': samples}
 
@@ -78,12 +79,39 @@ rule cutadapt:
         wrapper_for('cutadapt')
 
 
+def multiqc_inputs():
+    inputs = []
+    check_for = ['fastq', 'bam']
+    for i in targets:
+        for j in check_for:
+            if j in i:
+                inputs.append(i)
+                break
+    return inputs
+
+
 rule multiqc:
-    input: filter(lambda x: 'fastq' in x, targets)
+    input: multiqc_inputs()
     output: 'multiqc_report.html'
     log: 'multiqc_report.log'
     params: analysis_directory='pasilla'
     wrapper:
         wrapper_for('multiqc')
+
+# TODO: this will eventually be supplied by the config system.
+data_dir = '/data/LCDB/references'
+assembly = 'dm6'
+rule hisat2:
+    input:
+        index=expand('{data_dir}/{assembly}/hisat2/dm6_default.{n}.ht2',
+                      data_dir=data_dir, assembly=assembly, n=range(1, 9)),
+        fastq='pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz'
+    output:
+        'pasilla/{sample}/{sample}.cutadapt.hisat2.bam'
+    log: 'pasilla/{sample}/{sample}.cutadapt.hisat2.bam.log'
+    params: extra="--max-intronlen 50000"
+    threads: 8
+    wrapper:
+        wrapper_for('hisat2')
 
 # vim: ft=python

@@ -1,0 +1,123 @@
+$schema: http://json-schema.org/draft-04/schema#
+
+type: object
+description: |
+  Defines sources of sequences and annotations. The references, annotations,
+  and indexes specified here will be built in subdirectories of the data dir.
+
+definitions:
+  index:
+    type: string
+    enum:
+      - bowtie2
+      - hisat2
+      - kallisto
+
+  conversion:
+    type: string
+    enum:
+      - intergenic
+
+  fastaobj:
+    type: object
+    description: |
+      Fasta file. Expected to be gzipped; if not then use a postprocess
+      hook to fix it.
+    properties:
+      assembly:
+        type: string
+        default: "dm6"
+        descripton: |
+          A subdirectory under "data_dir" will be created for this assembly.
+      url:
+        type: string
+        default: '"ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-chromosome-r6.11.fasta.gz"'
+        description: |
+          URL to fasta file.
+      type:
+        type: string
+        default: "fasta"
+        description: When defining a fasta file, this field must be "fasta"
+        enum:
+          - fasta
+      postprocess:
+        type: string
+        default: "dm6.fasta_postprocess"
+        description: |
+          Optional dotted-name syntax indicating a module and function to use
+          in order to convert the file downloaded from the URL into
+          a well-formatted gzipped FASTA file ready for indexing.
+      tag:
+        type: string
+        default: "genome"
+        description: |
+          Tag for this fasta file. Can be used to differentiate versions;
+          default final output will be {data_dir}/{assembly}/{assembly}.fa.gz
+          but if tag is specified, then it will be
+          {data_dir}/{assembly}/{assembly}.{tag}.fa.gz
+      indexes:
+        type: array
+        default: [bowtie2, hisat2]
+        items:
+          $ref: "#/definitions/index"
+    required:
+      - assembly
+      - type
+
+  gtfobj:
+    type: object
+    description: |
+      This is an example gene annotation file in GTF format. Expected to be
+      gzipped; if not then use a postprocess hook to fix it. In contrast to fasta
+      files (which can have indexes created from them), GTF files can have
+      conversions applied to them. The conversions are performed in the snakemake workflow.
+    properties:
+      assembly:
+        type: string
+        default: dm6
+      url:
+        type: string
+        default: '"ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/gtf/dmel-all-r6.11.gtf.gz"'
+
+      type:
+        type: string
+        default: "gtf"
+        enum:
+          - gtf
+      tag:
+        type: string
+        default: "r6.11"
+      postprocess:
+        type: string
+        default: "dm6.gtf_postprocess"
+      conversions:
+        type: array
+        default: [intergenic]
+        items:
+          $ref: '#/definitions/conversion'
+    required:
+      - assembly
+      - type
+
+
+properties:
+  references:
+    type: array
+    description: |
+      Configuration blocks for references. This is a list of items, each of
+      which describe either a FASTA or GTF file (the filetype is specified in
+      the "type" field). Each has a URL to get the data from, an optional postprocess
+      hook which specifies a Python module and function to apply to the downloaded
+      data, and a tag to differentiate between references. FASTA files can then be
+      indexed for various aligners; GTF files can have various conversions applied to
+      them.
+    items:
+      anyOf: 
+        - $ref: "#/definitions/fastaobj"
+        - $ref: "#/definitions/gtfobj"
+  data_dir:
+    type: string
+    default: "/data/LCDB/references"
+    description: |
+      Top-level directory. A subdirectory named after each configured assembly
+      will be created here and all generated files will go in that subdirectory.
