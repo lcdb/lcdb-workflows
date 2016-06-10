@@ -3,3 +3,5 @@ fastqc
 cutadapt >=1.9.1
 multiqc
 jsonschema
+samtools
+hisat2
