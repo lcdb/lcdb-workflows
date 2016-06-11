@@ -110,4 +110,30 @@ rule hisat2:
     wrapper:
         wrapper_for('hisat2')
 
+
+rule fastq_screen:
+    input: '{sample_dir}/{sample}/{sample}_R1.fastq.gz'
+    output:
+        txt='{sample_dir}/{sample}/{sample}_R1.fastq_screen.txt',
+        png='{sample_dir}/{sample}/{sample}_R1.fastq_screen.png'
+    log: '{sample_dir}/{sample}/{sample}_R1.fastq_screen.log'
+    params:
+        fastq_screen_config={
+            'database': {
+                'ecoli': {
+                    'bowtie2': '/data/LCDB/references/ecoli/bowtie2/ecoli_default',
+                },
+                'wolbachia': {
+                    'bowtie2': '/data/LCDB/references/wolbachia/bowtie2/wolbachia_default',
+                },
+                'dm6': {
+                    'bowtie2': '/data/LCDB/references/dm6/bowtie2/dm6_default',
+                },
+            },
+            'aligner_paths': {'bowtie2': 'bowtie2'},
+        }
+    wrapper:
+        wrapper_for('fastq_screen')
+
+
 # vim: ft=python
