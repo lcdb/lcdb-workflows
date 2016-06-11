@@ -6,3 +6,5 @@ test/.snakemake
 test/multiqc*
 */.snakemake
 .snakemake
+lcdb-workflows-submit-*.sh
+slurm-*out
