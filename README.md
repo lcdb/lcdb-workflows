@@ -1,99 +1,88 @@
 # lcdb-workflows
 snakemake workflows for LCDB bioinformatics
 
-[![Build Status](https://travis-ci.org/lcdb/lcdb-workflows.svg?branch=master)](https://travis-ci.org/lcdb/lcdb-workflows)
-
-## Testing
-Continuous integration testing is performed by
-[Travis-CI](https://travis-ci.org) on every push to github.
-
-See the `.travis.yml` file for the configuration. The testing takes advantage
-of a prepared [Docker](https://docker.com) container that has all prerequisites
-installed, and then runs the `travis-test.sh` script on the travis-ci infrastructure.
-
-The Docker container has already been created and uploaded to
-[dockerhub](https://hub.docker.com) using the commands:
-
-```bash
-cd docker && docker build -t daler/lcdb-workflows . && docker upload daler/lcdb-workflows
-```
-
-
-### Run local tests with Docker
-This ensures the most isolated environment to run local tests, and most closely
-approximates the testing performed on travis-ci. If the tests pass locally,
-they should pass on travis-ci. But first you need to do some setup:
-
-1. Install Docker ([Mac OSX](https://docs.docker.com/mac/) or
-   [Linux](https://docs.docker.com/linux/)).
-
-2. Download the Docker container with:
-
-```bash
-docker pull daler/lcdb-workflows
-```
-
-3. Download and prepare the example data:
-
-```bash
-test/get-data.sh
-```
-
-This completes the setup. In the future, to run the tests:
-
-```bash
-docker pull daler/lcdb-workflows  # update the docker image if needed
-docker run --rm -it -v $(pwd):/opt/lcdb -u $(id -u):$(id -g) daler/lcdb-workflows /bin/bash travis-test.sh
-```
-
-Some explanation of what's happening there:
-
-- `docker run` runs the container. Think a virtual machine that starts up instantly
-- `--rm` removes the container when it exits to save space
-- `-it` means `--interactive` `--tty`. It attaches the command line to the container after starting it so it essentially runs in the foreground
-- `-v $(pwd):/opt/lcdb` exports the current working directory into the
-  container, effectively mounting it at `/opt/lcdb`. The container can then make
-  changes to the directory and they will show up on the filesystem.
-- `-u $(id -u):$(id -g)` sets the user and group of the container to the
-  current user and group. This is to avoid having the container create files
-  owned by root that you'd have to later chown.
-- `daler/lcdb-workflows` is the name of the container
-- `/bin/bash travis-test.sh` runs bash as the shell and then runs the test driver script.
-
-If you want to poke around in the container, leave off the `travis-test.sh` and
-you'll drop into a shell in the container. Note that any changes you make to
-the system (apt-get install, conda install, etc) will not persist after the
-container exits.
-
-## Setting up without Docker
-Not all environments support Docker (i.e. biowulf/helix). In this situation,
-you can use the `docker/requirements.txt` file to build your own isolated
-environment.
-
+## First-time setup
+### Conda
 If you don't already have `conda`, install
 [miniconda](http://conda.pydata.org/miniconda.html) (Python 3 version
 recommended).
 
-Then choose a name for your environment. Here we use `lcdb`:
+### Generate references and indexes
+- Change to the `workflows/references` directory
+- Create the references environment:
 
 ```bash
-conda create -n lcdb --file docker/requirements.txt -c bioconda -c r python=3
+conda create -n references --file references_requirements.txt -c bioconda
 ```
 
-This creates an isolated environment. To use it you have to temporarily activate it:
+- Edit `references_config.yaml` as needed. To run the tests on a different
+  machine, you probably only need to edit the `data_dir` field.
+
+- Run `workflows/references.snakefile`. This will take some time (an hour?)
+  depending on connection speeds and how many CPUs are available; the minimal
+  command is:
 
 ```bash
-source activate lcdb
+snakemake -s references.snakefile --configfile references_config.yaml
 ```
 
-When you're done, deactivate
+## Testing
+There are several methods of testing. In order for a test to be run, we need
+the environment to be set up, we need references to be generated (see above)
+and we need example data. The test data and Snakefile are in the `test` dir;
+check that directory for output.
+
+### Method 0: development
+Usually during development you'll be doing iterative changes on a local machine
+or an interactive node. In this case, it's easiest to create a conda
+environment based on `test/requirements.txt`:
 
 ```bash
-source deactivate
+conda create -n test-env --file test/requirements.txt -c bioconda
+source activate test-env
 ```
 
-Once your environment is activated, run the tests:
+Then from within the `test` directory run the example workflow using this
+minimal command (you'll probably want to set `-j` as appropriate):
 
 ```bash
-bash travis-test.sh
+snakemake --configfile config.yaml
 ```
+
+### Method 1: local server or interactive node
+To ensure reproducibility, the most complete way to run the test is to build
+a brand new environment:
+
+```bash
+# Note the trailing ".", pointing to the top-level of the repo to test
+test/run_test.py --build-env .
+```
+
+This will build an environment called `lcdb-workflows-$USER-test`, deleting it
+first if it already exists. It uses your current `conda` installation and
+installs packages from `test/requirements.txt`.
+
+Then run the test with:
+
+```bash
+# Note the trailing "."
+test/run_test.py .
+```
+The test will download data (via `test/get-data.sh`) if needed and run the
+`test/Snakefile` with the config file `test/config.yaml`.
+
+If you're on an interactive node, the test will run with as many threads as
+have been allocated (`$SLURM_CPUS_PER_TASK`). Otherwise, specify `--threads` in
+the call to `run_test.py`.
+
+
+### MEthod 2: run on cluster
+Generate a submission script and print the `sbatch` command which can be pasted
+to submit the job:
+
+```bash
+test/run_test.py --sbatch --threads=8 --mem=32g
+```
+
+This will also automatically generate a new environment; paste the command into
+the terminal to submit the job.
