@@ -1,7 +1,9 @@
 snakemake
 fastqc
+pandas
 cutadapt >=1.9.1
 multiqc
 jsonschema
 samtools
 hisat2
+fastq-screen
