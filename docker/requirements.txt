@@ -5,3 +5,4 @@ multiqc
 jsonschema
 samtools
 hisat2
+fastq-screen
