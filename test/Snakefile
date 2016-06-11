@@ -2,25 +2,21 @@
 
 import yaml
 import itertools
+import pandas
 
-samples = [
-    'treated1',
-    'treated2',
-    #'treated3',
-    'untreated1',
-    'untreated2',
-    #'untreated3',
-    #'untreated4'
-]
+sampletable = pandas.read_table(config['sampletable'], index_col=0)
+samples = sampletable.index.tolist()
 
 patterns = [
-    'pasilla/{sample}/{sample}_R1.fastqc.html',
-    'pasilla/{sample}/{sample}_R1.cutadapt.fastqc.html',
-    'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz',
+    '{sample_dir}/{sample}/{sample}_R1.fastqc.html',
+    '{sample_dir}/{sample}/{sample}_R1.fastq_screen.txt',
+    '{sample_dir}/{sample}/{sample}_R1.fastq_screen.png',
+    '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastqc.html',
+    '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz',
+    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam',
     'multiqc_report.html',
-    'pasilla/{sample}/{sample}.cutadapt.hisat2.bam'
 ]
-supplied = {'sample': samples}
+supplied = {'sample': samples, 'sample_dir': config['sample_dir']}
 
 # Fill in each pattern with each item in "supplied", resulting in a list of
 # lists. Collapse that into a list of strings, and then unique them into a set
@@ -98,17 +94,17 @@ rule multiqc:
     wrapper:
         wrapper_for('multiqc')
 
-# TODO: this will eventually be supplied by the config system.
-data_dir = '/data/LCDB/references'
-assembly = 'dm6'
+
 rule hisat2:
     input:
+        fastq='{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz',
         index=expand('{data_dir}/{assembly}/hisat2/dm6_default.{n}.ht2',
-                      data_dir=data_dir, assembly=assembly, n=range(1, 9)),
-        fastq='pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz'
+                     data_dir=config['data_dir'],
+                     assembly=config['assembly'],
+                     n=range(1, 9)),
     output:
-        'pasilla/{sample}/{sample}.cutadapt.hisat2.bam'
-    log: 'pasilla/{sample}/{sample}.cutadapt.hisat2.bam.log'
+        '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam'
+    log: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam.log'
     params: extra="--max-intronlen 50000"
     threads: 8
     wrapper:
