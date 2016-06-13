@@ -10,7 +10,7 @@ from snakemake.shell import shell
 shell("bam2mr {snakemake.input[0]} > sorted.nr")
 
 # execute preseq gc_extrap
-shell("preseq gc_extrap {snakemake.params.quick} {snakemake.params.paired} -o {snakemake.output[0]} sorted.nr")
+shell("preseq gc_extrap -o {snakemake.output[0]} sorted.nr")
 
 # remove sorted.nr
-#shell("rm sorted.nr")
+shell("rm sorted.nr")
