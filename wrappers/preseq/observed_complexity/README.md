@@ -3,26 +3,20 @@
 Preseq method that generates a complexity plot of the genome library based on observed data.
 
 ## Input
-* BAM/BED: *Sorted* according to chromosome and start position
+* Coordinate-sorted BAM. If paired-end, include `-P` in params.extra to run in
+paired-end mode.
 
 ## Output
-* complexity_output.txt: two column text file displaying the *total reads* and a corresponding number of *distinct reads*
+* two column text file displaying the *total reads* and a corresponding number of *distinct reads*
 
 ## Threads
 Threads not supported.
 
-## Params
-* <code>-B, -bam</code>: should be included if input is a BAM file
-* <code>-o, -output</code>: allows one to specify a name for the output file
-* <code>-P, -pe</code>: if input is paired end preseq will register both mapped ends separately
-
 ## Example
-<pre><code>
+```python
 rule preseq_ccurve:
-    input: 
-		sortBAM='{sample}.sorted.bam'
-    output:
-        complexOut='complexity_output.txt'
+    input: '{sample}.sorted.bam'
+    output: '{sample}.complexity_output.txt'
     wrapper:
         "file://path/to/preseq/observed_complexity"
-</code></pre>
+```
