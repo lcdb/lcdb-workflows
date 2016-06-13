@@ -20,11 +20,9 @@ Threads not supported.
 <pre><code>
 rule preseq_ccurve:
     input: 
-		"mapped/{sample}.sorted.bam"
+		sortBAM='{sample}.sorted.bam'
     output:
-        "mapped/complexity_output.txt"
-    params:
-        "-B -o complexity_output.txt"
+        complexOut='complexity_output.txt'
     wrapper:
         "file://path/to/preseq/observed_complexity"
 </code></pre>

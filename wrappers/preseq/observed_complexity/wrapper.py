@@ -6,5 +6,10 @@ __license__ = "MIT"
 # import snakemake's ability to execute shell commands
 from snakemake.shell import shell
 
+try:
+    output = snakemake.params.output
+except AttributeError:
+    output = ""
+
 # execute preseq c_curve
-shell("preseq c_curve {snakemake.params} {snakemake.input[0]} {snakemake.output[0]}")
+shell("preseq c_curve -B {snakemake.input[0]} -o {snakemake.output[0]}")
