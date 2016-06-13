@@ -138,6 +138,11 @@ rule fastq_screen:
 
 # TODO: placeholder for samtools view -b -q 20 {input} > {output} rule to
 # remove multimappers
+rule samtool_unique:
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
+    wrapper:
+        wrapper_for('samtools/view')
 
 rule preseq_observed_complexity:
     input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
@@ -145,6 +150,17 @@ rule preseq_observed_complexity:
     wrapper:
         wrapper_for('preseq/observed_complexity')
 
-# TODO: placeholder for other preseq tools
+rule preseq_expected_complexity:
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.expected_complexity'
+    wrapper:
+        wrapper_for('preseq/expected_complexity')
 
+rule preseq_expected_coverage:
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.expected_coverage'
+    wrapper:
+        wrapper_for('preseq/expected_coverage')
+
+        
 # vim: ft=python
