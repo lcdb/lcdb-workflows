@@ -7,4 +7,4 @@ __license__ = "MIT"
 from snakemake.shell import shell
 
 # execute preseq c_curve
-shell("preseq c_curve {snakemake.params} {snakemake.input[0]} {snakemake.output[0]}")
+shell("preseq c_curve -B {snakemake.input[0]} -o {snakemake.output[0]}")

@@ -20,11 +20,9 @@ Threads not supported.
 <pre><code>
 rule preseq_lcextrap:
     input: 
-		"mapped/{sample}.sorted.bam"
+		sortBAM='{sample}.sorted.bam'
     output:
-        "mapped/future_yield.txt"
-    params:
-        "-B -o future_yield.txt"
+        complexOut='future_yield.txt'
     wrapper:
         "file://path/to/preseq/estimated_complexity"
 </code></pre>
