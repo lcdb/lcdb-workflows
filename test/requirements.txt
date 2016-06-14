@@ -8,3 +8,4 @@ samtools
 hisat2
 fastq-screen
 preseq
+bowtie2>=2.2.8

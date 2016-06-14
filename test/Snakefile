@@ -14,9 +14,11 @@ patterns = [
     '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastqc.html',
     '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam',
+    '{sample_dir}/{sample}/{sample}.cutadapt.bt2.bam',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.observed_complexity',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_complexity',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_coverage',
+    'bowtie2/dm6_chr2L.1.bt2',
     'multiqc_report.html',
 ]
 supplied = {'sample': samples, 'sample_dir': config['sample_dir']}
@@ -173,5 +175,21 @@ rule preseq_expected_coverage:
     wrapper:
         wrapper_for('preseq/estimated_coverage')
 
+rule bowtie2:
+    input: fastq='{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz',
+           index=expand('{data_dir}/{assembly}/bowtie2/dm6_default.{n}.bt2',
+                        data_dir=config['data_dir'],
+                        assembly=config['assembly'],
+                        n=range(1,5))
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.bt2.bam'
+    log: '{sample_dir}/{sample}/{sample}.cutadapt.bt2.log'
         
+rule bowtie2build:
+    input: '{prefix}.fasta'
+    output: '{path}/{prefix}.1.bt2'
+    log: '{path}/{prefix}.bt2.build.log'
+    wrapper:
+        wrapper_for('bowtie2/build')
+
+
 # vim: ft=python
