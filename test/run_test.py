@@ -93,7 +93,7 @@ def create_env(name, repo):
         sp.check_call([
             'conda', 'env', 'remove', '-n', name])
     sp.check_call([
-        'conda', 'create', '-n', name, '--file', requirements(repo), '-c', 'bioconda', '-c', 'r'])
+        'conda', 'create', '-n', name, '--file', requirements(repo), '-c', 'bioconda', '-c', 'r', 'python=3'])
 
 
 if args.build_env:
