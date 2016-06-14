@@ -181,8 +181,11 @@ rule bowtie2:
                         data_dir=config['data_dir'],
                         assembly=config['assembly'],
                         n=range(1,5))
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.bt2.bam'
+    output: 
+        '{sample_dir}/{sample}/{sample}.cutadapt.bt2.bam'
     log: '{sample_dir}/{sample}/{sample}.cutadapt.bt2.log'
+    wrapper:
+        wrapper_for('bowtie2/align')
         
 rule bowtie2build:
     input: '{prefix}.fasta'
