@@ -106,7 +106,7 @@ script = """\
 
 set -e
 
-source /data/LCDB/env/miniconda3/bin/activate {env_name}
+source activate {env_name}
 cd {repo}/test
 ./get-data.sh
 snakemake clean --configfile config.yaml
