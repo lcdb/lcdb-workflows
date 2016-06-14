@@ -7,3 +7,4 @@ jsonschema
 samtools
 hisat2
 fastq-screen
+preseq
