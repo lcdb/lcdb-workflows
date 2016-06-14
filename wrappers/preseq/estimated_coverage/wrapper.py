@@ -3,11 +3,17 @@ __copyright__ = "Copyright 2016, Behram Radmanesh"
 __email__ = "behram.radmanesh@nih.gov"
 __license__ = "MIT"
 
-# import snakemake's ability to execute shell commands
 from snakemake.shell import shell
 
-# execute bam2mr
-shell("bam2mr {snakemake.input[0]} > sorted.nr")
+# bam2mr converts BAM to a format used by preseq
+shell("bam2mr {snakemake.input[0]} > {snakemake.output[0]}.sorted.nr")
 
-# execute preseq gc_extrap
-shell("preseq gc_extrap {snakemake.params} {snakemake.output[0]} sorted.nr")
+try:
+    extra = snakemake.params.extra
+except AttributeError:
+    extra = ""
+
+shell("preseq gc_extrap {extra} -o {snakemake.output[0]} {snakemake.output[0]}.sorted.nr")
+
+# the nr is only used internally for this wrapper
+shell("rm {snakemake.output[0]}.sorted.nr")

@@ -2,31 +2,36 @@
 
 Preseq method that predicts the genomic coverage from deep sequencing based on observed data.
 
+The wrapper runs `bam2mr` on the input BAM file, so the `-B` parameter should
+not be specified.
+
 ## Input
-* BAM/BED: *Sorted* according to chromosome and start position
+
+* Coordinate-sorted BAM. If paired-end, include `-P` in params.extra to run in
+paired-end mode.
 
 ## Output
-* future_coverage.txt: four column text file displaying the *total bases*, *expected covered bases* and the corresponding *lower/upper 95% confidence interval*
+
+* future_coverage.txt: four column text file displaying the *total bases*,
+  *expected covered bases* and the corresponding *lower/upper 95% confidence
+  interval*
 
 ## Threads
 Threads not supported.
 
 ## Params
-* <code>-B, -bam</code>: should be included if input is a BAM file
-* <code>-o, -output</code>: allows one to specify a name for the output file
-* <code>-P, -pe</code>: if input is paired end preseq will register both mapped ends separately
-* <code>-c, -cval</code>: confidence intervals (Default at 0.95)
-* <code>-Q, -quick</code>: quick mode to estimate yield without bootstrapping for confidence intervals
+extra: a string that will be passed verbatim to gc_extrap.
+
+Try `-Q` for quick mode, which doesn't take 15 min to run, but you lose
+confidence intervals.
 
 ## Example
-<pre><code>
-rule preseq_ccurve:
-    input: 
-		"mapped/{sample}.sorted.bam"
-    output:
-        "mapped/future_coverage.txt"
-    params:
-        "-o"
+
+```python
+rule preseq_gcextrap:
+    input: '{sample}.sorted.bam'
+    output: '{sample}.future_coverage.txt'
+    params: extra="-Q -P"
     wrapper:
         "file://path/to/preseq/estimated_coverage"
-</code></pre>
+```

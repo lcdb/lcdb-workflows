@@ -14,6 +14,9 @@ patterns = [
     '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastqc.html',
     '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam',
+    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.observed_complexity',
+    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_complexity',
+    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_coverage',
     'multiqc_report.html',
 ]
 supplied = {'sample': samples, 'sample_dir': config['sample_dir']}
@@ -136,4 +139,39 @@ rule fastq_screen:
         wrapper_for('fastq_screen')
 
 
+# TODO: placeholder for samtools view -b -q 20 {input} > {output} rule to
+# remove multimappers
+rule samtools_unique:
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
+    wrapper:
+        wrapper_for('samtools/view')
+
+rule samtools_sort:
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
+    params: ""
+    threads: 8
+    wrapper:
+        wrapper_for('samtools/sort')
+        
+rule preseq_observed_complexity:
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.observed_complexity'
+    wrapper:
+        wrapper_for('preseq/observed_complexity')
+
+rule preseq_expected_complexity:
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_complexity'
+    wrapper:
+        wrapper_for('preseq/estimated_complexity')
+
+rule preseq_expected_coverage:
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_coverage'
+    wrapper:
+        wrapper_for('preseq/estimated_coverage')
+
+        
 # vim: ft=python
