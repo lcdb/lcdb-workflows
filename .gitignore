@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+test/bowtie2
 test/pasilla
 test/.snakemake
 test/multiqc*
