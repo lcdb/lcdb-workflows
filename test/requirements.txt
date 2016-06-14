@@ -8,3 +8,4 @@ samtools
 hisat2
 fastq-screen
 preseq
+picard>=2.3.0-0

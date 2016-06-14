@@ -17,6 +17,8 @@ patterns = [
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.observed_complexity',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_complexity',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_coverage',
+    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dup.bam',
+    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dup.metrics',
     'multiqc_report.html',
 ]
 supplied = {'sample': samples, 'sample_dir': config['sample_dir']}
@@ -173,5 +175,16 @@ rule preseq_expected_coverage:
     wrapper:
         wrapper_for('preseq/estimated_coverage')
 
-        
+rule picard_MarkDuplicates:
+    input:
+        bam = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam',
+        bai = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam.bai'
+    output:
+        bam = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dup.bam',
+        metrics = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dup.metrics'
+    params:
+        extra="REMOVE_DUPLICATES=true VALIDATION_STRINGENCY=SILENT"
+    wrapper:
+        wrapper_for('picard/MarkDuplicates')
+
 # vim: ft=python
