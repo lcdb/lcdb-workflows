@@ -93,7 +93,7 @@ def create_env(name, repo):
         sp.check_call([
             'conda', 'env', 'remove', '-n', name])
     sp.check_call([
-        'conda', 'create', '-n', name, '--file', requirements(repo), '-c', 'bioconda', '-c', 'r'])
+        'conda', 'create', '-n', name, '--file', requirements(repo), '-c', 'bioconda', '-c', 'r', 'python=3', '-y'])
 
 
 if args.build_env:
@@ -106,7 +106,7 @@ script = """\
 
 set -e
 
-source /data/LCDB/env/miniconda3/bin/activate {env_name}
+source activate {env_name}
 cd {repo}/test
 ./get-data.sh
 snakemake clean --configfile config.yaml
