@@ -18,6 +18,8 @@ patterns = [
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.observed_complexity',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_complexity',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_coverage',
+    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dup.bam',
+    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dup.metrics',
     'bowtie2/dm6_chr2L.1.bt2',
     'multiqc_report.html',
 ]
@@ -194,5 +196,16 @@ rule bowtie2build:
     wrapper:
         wrapper_for('bowtie2/build')
 
+rule picard_MarkDuplicates:
+    input:
+        bam = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam',
+        bai = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam.bai'
+    output:
+        bam = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dup.bam',
+        metrics = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dup.metrics'
+    params:
+        extra="REMOVE_DUPLICATES=true VALIDATION_STRINGENCY=SILENT"
+    wrapper:
+        wrapper_for('picard/MarkDuplicates')
 
 # vim: ft=python

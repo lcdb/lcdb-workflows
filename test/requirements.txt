@@ -9,3 +9,4 @@ hisat2
 fastq-screen
 preseq
 bowtie2>=2.2.8
+picard>=2.3.0-0
