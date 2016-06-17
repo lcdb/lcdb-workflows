@@ -225,9 +225,10 @@ rule dupRadar:
     output:
         dupSmooth = '{sample_dir}/{sample}/{sample}_dupRadar_drescatter.png'
     params:
-        paired="FALSE",
+        paired="no",
         stranded="no",
-        outdir='{sample_dir}/{sample}'
+        outdir='{sample_dir}/{sample}/',
+        name='{sample}'
     threads: 8
     wrapper:
         wrapper_for('dupRadar')

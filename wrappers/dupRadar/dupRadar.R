@@ -38,11 +38,13 @@ paired   <- gsub("paired=","",args[4])
 outdir   <- gsub("outdir=","",args[5])
 ## number of threads to be used
 threads  <- as.integer(gsub("threads=","",args[6]))
+## file name
+name <- args[7]
 
-if(length(args) != 6) { 
+if(length(args) != 7) { 
   stop (paste0("Usage: ./dupRadar.sh <file.bam> <genes.gtf> ",
                "<stranded=[no|yes|reverse]> paired=[yes|no] ",
-               "outdir=./ threads=1"))
+               "outdir=./ threads=1 name=treated1"))
 }
 
 if(!file.exists(bam)) { 
@@ -76,10 +78,6 @@ stranded <- if(stranded == "no") 0 else if(stranded == "yes") 1 else 2
 ########################################
 
 ########################################
-##
-## analyze duprates and create plots
-##
-cat("Processing file ", bam, " with GTF ", gtf, "\n")
 
 ## calculate duplication rate matrix
 dm <- analyzeDuprates(bam,
@@ -91,7 +89,7 @@ dm <- analyzeDuprates(bam,
 ## produce plots
 
 ## duprate vs. expression smooth scatter
-png(file=paste0(outdir,"/",gsub("(.*)\\.[^.]+","\\1",basename(bam)),"_dupRadar_drescatter.png"),
+png(file=paste0(outdir,"/",name,"_dupRadar_drescatter.png"),
     width=1000, height=1000)
 duprateExpDensPlot(dm, main=basename(bam))
 dev.off()
