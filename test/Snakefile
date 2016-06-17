@@ -212,7 +212,7 @@ rule picard_MarkDuplicates:
         bam = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.bam',
         metrics = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.metrics'
     params:
-        extra="REMOVE_DUPLICATES=true VALIDATION_STRINGENCY=SILENT"
+        extra="REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=SILENT"
     log: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.log',
     wrapper:
         wrapper_for('picard/MarkDuplicates')
