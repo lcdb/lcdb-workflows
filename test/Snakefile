@@ -36,9 +36,9 @@ targets = list(
     )
 )
 
+# srcdir() is a snakemake built-in function. WRAPPERS must be relative to this
+# file.
 HERE = srcdir('')
-
-# relative to the directory of the current snakefile.
 WRAPPERS = '../wrappers'
 
 
@@ -52,11 +52,11 @@ def wrapper_for(tool):
 rule all:
     input: targets
 
+
 rule clean:
     run:
-        for t in targets:
-            if os.path.exists(t):
-                shell("rm -r {t}")
+        shell('rm -r {config[sample_dir]}')
+        shell('./get-data.sh')
 
 
 rule fastqc:
@@ -88,6 +88,8 @@ def multiqc_inputs():
     for i in targets:
         for j in check_for:
             if j in i:
+                # Doesn't matter which of `check_for` we found, just *that* we
+                # found one, so we only add the input once.
                 inputs.append(i)
                 break
     return inputs
@@ -143,13 +145,12 @@ rule fastq_screen:
         wrapper_for('fastq_screen')
 
 
-# TODO: placeholder for samtools view -b -q 20 {input} > {output} rule to
-# remove multimappers
 rule samtools_unique:
     input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam'
     output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
     wrapper:
         wrapper_for('samtools/view')
+
 
 rule samtools_sort:
     input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
@@ -158,7 +159,8 @@ rule samtools_sort:
     threads: 8
     wrapper:
         wrapper_for('samtools/sort')
-        
+
+
 rule samtools_index:
     input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
     output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam.bai'
@@ -166,11 +168,13 @@ rule samtools_index:
     wrapper:
         wrapper_for('samtools/index')
 
+
 rule preseq_observed_complexity:
     input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
     output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.observed_complexity'
     wrapper:
         wrapper_for('preseq/observed_complexity')
+
 
 rule preseq_expected_complexity:
     input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
@@ -178,11 +182,13 @@ rule preseq_expected_complexity:
     wrapper:
         wrapper_for('preseq/estimated_complexity')
 
+
 rule preseq_expected_coverage:
     input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
     output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_coverage'
     wrapper:
         wrapper_for('preseq/estimated_coverage')
+
 
 rule bowtie2:
     input: fastq='{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz',
@@ -190,12 +196,12 @@ rule bowtie2:
                         data_dir=config['data_dir'],
                         assembly=config['assembly'],
                         n=range(1,5))
-    output: 
+    output:
         '{sample_dir}/{sample}/{sample}.cutadapt.bt2.bam'
     log: '{sample_dir}/{sample}/{sample}.cutadapt.bt2.log'
     wrapper:
         wrapper_for('bowtie2/align')
-        
+
 rule bowtie2build:
     input: '{prefix}.fasta'
     output: '{path}/{prefix}.1.bt2'
