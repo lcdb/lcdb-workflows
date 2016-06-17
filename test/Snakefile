@@ -220,14 +220,15 @@ rule picard_MarkDuplicates:
 rule dupRadar:
     input:
        dupBAM = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.bam',
-       GTF = '/data/LCDB/references/dm6/dm6_r6-11.gtf.gz',
-       dupRScript = wrapper_for('/dupRadar/dupRadar.R')
+       GTF = '/data/LCDB/references/dm6/dm6_r6-11.gtf',
+       dupRScript = wrapper_for('dupRadar/dupRadar.R')
     output:
         dupSmooth = '{sample_dir}/{sample}/{sample}_dupRadar_drescatter.png'
     params:
-        paired="no",
+        paired="FALSE",
         stranded="no",
         outdir='{sample_dir}/{sample}'
+    threads: 8
     wrapper:
         wrapper_for('dupRadar')
         

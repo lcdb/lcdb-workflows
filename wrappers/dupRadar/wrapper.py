@@ -28,4 +28,4 @@ outdir=os.path.dirname(snakemake.output[0])
 # multiple lines for clarity. Note the space at the end of each line for when
 # the lines are concatenated. Also note the use of {extra} and {log} as
 # specified above.
-shell("Rscript {snakemake.input.dupRScript} {snakemake.input.dupBAM} gtf={snakemake.input.GTF} stranded={snakemake.params.stranded} paired={snakemake.params.paired} outdir={snakemake.params.outdir}")
+shell("Rscript {snakemake.input.dupRScript} {snakemake.input.dupBAM} gtf={snakemake.input.GTF} stranded={snakemake.params.stranded} paired={snakemake.params.paired} outdir={snakemake.params.outdir} threads={snakemake.threads}")
