@@ -35,7 +35,7 @@ stranded <- gsub("stranded=","",args[3])
 ## is a paired end experiment
 paired   <- gsub("paired=","",args[4])
 ## output directory
-outdir   <- gsub("outdir=","",args[5])
+outfile   <- gsub("outfile=","",args[5])
 ## number of threads to be used
 threads  <- as.integer(gsub("threads=","",args[6]))
 ## file name
@@ -44,7 +44,7 @@ name <- args[7]
 if(length(args) != 7) { 
   stop (paste0("Usage: ./dupRadar.sh <file.bam> <genes.gtf> ",
                "<stranded=[no|yes|reverse]> paired=[yes|no] ",
-               "outdir=./ threads=1 name=treated1"))
+               "outfile=./ threads=1 name=treated1"))
 }
 
 if(!file.exists(bam)) { 
@@ -55,9 +55,6 @@ if(!file.exists(gtf)) {
   stop(paste("File",gtf,"does NOT exist"))
 }
 
-if(!file.exists(outdir)) { 
-  stop(paste("Dir",outdir,"does NOT exist"))
-}
 
 if(is.na(stranded) | !(grepl("no|yes|reverse",stranded))) {
   stop("Stranded has to be no|yes|reverse")
@@ -89,7 +86,6 @@ dm <- analyzeDuprates(bam,
 ## produce plots
 
 ## duprate vs. expression smooth scatter
-png(file=paste0(outdir,"/",name,"_dupRadar_drescatter.png"),
-    width=1000, height=1000)
+png(file=outfile, width=1000, height=1000)
 duprateExpDensPlot(dm, main=basename(bam))
 dev.off()
