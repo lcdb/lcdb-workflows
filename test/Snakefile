@@ -149,6 +149,7 @@ rule fastq_screen:
 rule samtools_unique:
     input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam'
     output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
+    params: extra="-b -q 20"
     wrapper:
         wrapper_for('samtools/view')
 
