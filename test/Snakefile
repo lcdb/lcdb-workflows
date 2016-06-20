@@ -248,8 +248,9 @@ rule featureCounts:
         mappingFile='{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
     output:
         counts='{sample_dir}/{sample}/{sample}_counts.txt'
+    threads: 5
     params:
-        extra="-T 5 -t exon -g gene_id ",
+        extra="-T {snakemake.threads} -t exon -g gene_id "
     wrapper:
         wrapper_for('featureCounts')
 
