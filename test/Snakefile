@@ -250,7 +250,7 @@ rule featureCounts:
         counts='{sample_dir}/{sample}/{sample}_counts.txt'
     threads: 5
     params:
-        extra="-T {snakemake.threads} -t exon -g gene_id "
+        extra="-t exon -g gene_id "
     wrapper:
         wrapper_for('featureCounts')
 
