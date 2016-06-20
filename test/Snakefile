@@ -19,7 +19,8 @@ patterns = [
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_complexity',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_coverage',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.bam',
-    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.metrics',
+    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.metrics',\
+    '{sample_dir}/{sample}/{sample}_dupRadar_drescatter.png',
     'bowtie2/dm6_chr2L.1.bt2',
     'multiqc_report.html',
 ]
@@ -211,9 +212,25 @@ rule picard_MarkDuplicates:
         bam = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.bam',
         metrics = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.metrics'
     params:
-        extra="REMOVE_DUPLICATES=true VALIDATION_STRINGENCY=SILENT"
+        extra="REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=SILENT"
     log: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.log',
     wrapper:
         wrapper_for('picard/MarkDuplicates')
 
+rule dupRadar:
+    input:
+       dupBAM = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.bam',
+       GTF = '/data/LCDB/references/dm6/dm6_r6-11.gtf',
+       dupRScript = wrapper_for('dupRadar/dupRadar.R')
+    output:
+        dupSmooth = '{sample_dir}/{sample}/{sample}_dupRadar_drescatter.png'
+    params:
+        paired="no",
+        stranded="no",
+        outdir='{sample_dir}/{sample}/',
+        name='{sample}'
+    threads: 8
+    wrapper:
+        wrapper_for('dupRadar')
+        
 # vim: ft=python
