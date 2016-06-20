@@ -1,13 +1,18 @@
-__author__ = "Johannes Köster"
-__copyright__ = "Copyright 2016, Johannes Köster"
-__email__ = "koester@jimmy.harvard.edu"
+__author__ = "Ryan Dale"
+__copyright__ = "Copyright 2016, Ryan Dale"
+__email__ = "dalerr@niddk.nih.gov"
 __license__ = "MIT"
 
-
-import os
 from snakemake.shell import shell
 
+try:
+    extra = snakemake.params.extra
+except AttributeError:
+    extra = ""
 
-prefix = os.path.splitext(snakemake.output[0])[0]
+if snakemake.log:
+    log = "2> {log}".format(snakemake.log)
+else:
+    log = ""
 
-shell("samtools view -b -q 20 {snakemake.input[0]} > {snakemake.output[0]}")
+shell("samtools view {extra} {snakemake.input[0]} > {snakemake.output[0]} {log}")
