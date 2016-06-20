@@ -8,6 +8,19 @@ import sys
 
 env_name = 'lcdb-workflows-%s-env' % os.environ['USER']
 
+
+class bcolors:
+    "Fancy terminal color output. Thanks http://stackoverflow.com/a/287944"
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 ap = argparse.ArgumentParser()
 
 ap.add_argument('repo', help='Path to lcdb-workflows directory to test')
@@ -15,6 +28,15 @@ ap.add_argument('repo', help='Path to lcdb-workflows directory to test')
 ap.add_argument(
     '--build-env', action='store_true',
     help='Build environment "%s"' % env_name)
+
+ap.add_argument(
+    '--no-test', action='store_true',
+    help="Make the temp bash script, but don't actually run the test. "
+    "Useful in combination with --build-env")
+
+ap.add_argument(
+    '--clean', action='store_true',
+    help="Delete the test data directory and re-download data.")
 
 ap.add_argument(
     '--sbatch', action='store_true',
@@ -46,16 +68,6 @@ if args.threads is None:
 else:
     threads = args.threads
 
-class bcolors:
-    "Fancy terminal color output. Thanks http://stackoverflow.com/a/287944"
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
 
 REPO = os.path.abspath(args.repo)
 
@@ -99,6 +111,11 @@ def create_env(name, repo):
 if args.build_env:
     create_env(env_name, REPO)
 
+if args.clean:
+    CLEAN = "snakemake clean --configfile config.yaml"
+else:
+    CLEAN = ""
+
 # This will be saved as a temp file and either run or printed out in the sbatch
 # command.
 script = """\
@@ -108,25 +125,24 @@ set -e
 
 source activate {env_name}
 cd {repo}/test
-./get-data.sh
-snakemake clean --configfile config.yaml
+{CLEAN}
 snakemake -j {threads} -pr --configfile config.yaml
 """
 script_name = 'lcdb-workflows-submit-%s.sh' % (str(uuid.uuid4()).split('-')[0])
 with open(script_name, 'w') as fout:
-    fout.write(script.format(args, env_name=env_name, repo=REPO, threads=threads))
+    fout.write(script.format(args, env_name=env_name, repo=REPO, threads=threads, CLEAN=CLEAN))
 print(bcolors.OKBLUE + "Wrote " + script_name  + bcolors.ENDC)
 
 if args.sbatch:
-    create_env(env_name, REPO)
-    cmd = (
-        'sbatch '
-        '--mem={0.mem} '
-        '--cpus-per-task={threads} '
-        '{script_name} '.format(args, **locals()))
-    print(cmd)
+    cmd = [
+        'sbatch',
+        '--mem', args.mem,
+        '--cpus-per-task', str(threads),
+        '--mail-type=END,FAIL',
+        script_name]
+    sp.check_call(cmd)
     sys.exit(0)
 
-else:
+elif not args.no_test:
     print(bcolors.OKBLUE + "Running " + script_name + bcolors.ENDC)
     sp.check_call(['bash', script_name])
