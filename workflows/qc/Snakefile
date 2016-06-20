@@ -157,9 +157,8 @@ rule fastq_screen_config_file:
             prefix = os.path.join(config['data_dir'], prefix)
             table.append(['DATABASE', label, prefix, aligner.upper()])
 
-        table = fastq_screen_config_inputs()[1]
         with open(output[0], 'w') as fout:
-            fout.write(table)
+            fout.write('\n'.join(['\t'.join(i) for i in table]) + '\n')
 
 
 rule fastq_screen:
