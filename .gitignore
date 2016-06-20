@@ -10,3 +10,4 @@ test/multiqc*
 lcdb-workflows-submit-*.sh
 slurm-*out
 test/.Rsubread*
+/workflows/qc/fastq_screen_config.txt
