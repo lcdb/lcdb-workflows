@@ -34,7 +34,7 @@ rule featureCounts:
         counts="{sample}_counts.txt"
 	threads: 5
     params: 
-		extra="-T {snakemake.threads} -t exon -g gene_id "
+		extra="-t exon -g gene_id "
     wrapper:
-        "/path/to/wrapper/location"
+		"/path/to/wrapper/location"
 ```
