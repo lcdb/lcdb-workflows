@@ -23,6 +23,10 @@ rules:
         dm6: dm6/bowtie2/dm6_default
       aligner: bowtie2
 
+  samtools_unique:
+    params:
+      extra: '-q 20 -b'
+
   picard_MarkDuplicates:
     params:
       extra: "REMOVE_DUPLICATES=true VALIDATION_STRINGENCY=SILENT"
