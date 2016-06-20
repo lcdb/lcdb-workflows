@@ -1,7 +1,7 @@
 sampletable: pasilla_sampletable.tsv
 sample_dir: pasilla
 assembly: dm6
-data_dir: /data/LCDB/users/dalerr/references
+data_dir: /data/LCDB/references-test
 rules:
   cutadapt:
     params:
