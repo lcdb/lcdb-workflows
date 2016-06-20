@@ -21,6 +21,7 @@ patterns = [
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.bam',
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.metrics',\
     '{sample_dir}/{sample}/{sample}_dupRadar_drescatter.png',
+    '{sample_dir}/{sample}/{sample}_counts.txt',
     'bowtie2/dm6_chr2L.1.bt2',
     'multiqc_report.html',
 ]
@@ -232,5 +233,15 @@ rule dupRadar:
     threads: 8
     wrapper:
         wrapper_for('dupRadar')
-        
+
+rule featureCounts:
+    input:
+        annoGTF='/data/LCDB/references/dm6/dm6_r6-11.gtf',
+        mappingFile="{sample}.bam"
+    output:
+        counts="{sample}_counts.txt"
+    params:
+        extra="-T 5 -t exon -g gene_id ",
+    wrapper:
+        wrapper_for('featureCounts')
 # vim: ft=python
