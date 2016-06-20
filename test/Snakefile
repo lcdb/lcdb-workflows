@@ -237,7 +237,7 @@ rule dupRadar:
 rule featureCounts:
     input:
         annoGTF='/data/LCDB/references/dm6/dm6_r6-11.gtf',
-        mappingFile="{sample}.bam"
+        mappingFile='{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
     output:
         counts="{sample}_counts.txt"
     params:
