@@ -22,5 +22,5 @@ shell(
     "stranded={snakemake.params.stranded} "
     "paired={snakemake.params.paired} "
     "outfile={snakemake.output[0]} "
-    "threads={snakemake.threads} {snakemake.params.name}"
+    "threads={snakemake.threads}"
 )

@@ -236,8 +236,8 @@ rule dupRadar:
         stranded="no",
         outdir='{sample_dir}/{sample}/',
         name='{sample}'
-    threads: 8
+    log: "{sample_dir}/{sample}/{sample}_dupRadar.log"
     wrapper:
         wrapper_for('dupRadar')
-        
+
 # vim: ft=python
