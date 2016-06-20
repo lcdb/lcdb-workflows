@@ -9,3 +9,4 @@ test/multiqc*
 .snakemake
 lcdb-workflows-submit-*.sh
 slurm-*out
+test/.Rsubread*
