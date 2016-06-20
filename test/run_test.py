@@ -56,6 +56,11 @@ ap.add_argument(
     default='32g',
     help='Memory to request. Only has an effect if --sbatch also specified.')
 
+ap.add_argument(
+    '--workflow',
+    default='test',
+    help='Which workflow to test')
+
 args = ap.parse_args()
 
 # If no threads supplied and we're on an interactive node, use as many CPUs as
@@ -124,13 +129,14 @@ script = """\
 set -e
 
 source activate {env_name}
-cd {repo}/test
+cd {repo}/{args.workflow}
+./get-data.sh
 {CLEAN}
 snakemake -j {threads} -pr --configfile config.yaml
 """
 script_name = 'lcdb-workflows-submit-%s.sh' % (str(uuid.uuid4()).split('-')[0])
 with open(script_name, 'w') as fout:
-    fout.write(script.format(args, env_name=env_name, repo=REPO, threads=threads, CLEAN=CLEAN))
+    fout.write(script.format(args=args, env_name=env_name, repo=REPO, threads=threads, CLEAN=CLEAN))
 print(bcolors.OKBLUE + "Wrote " + script_name  + bcolors.ENDC)
 
 if args.sbatch:
