@@ -26,7 +26,7 @@ else:
 # the lines are concatenated. Also note the use of {extra} and {log} as
 # specified above.
 shell(
-    "featureCounts "
+    "featureCounts -T {snakemake.threads} "
     "{extra} "
     "-a {snakemake.input.annoGTF} "
     "-o {snakemake.output.counts} "
