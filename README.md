@@ -61,5 +61,5 @@ It builds a new environment before submitting to the cluster. Use the
 upon job completion or failure.
 
 ```bash
-test/run_test.py . --sbatch --build-env --clean
+test/run_test.py . --sbatch --build-env --clean --threads=8 --mem=32g
 ```
