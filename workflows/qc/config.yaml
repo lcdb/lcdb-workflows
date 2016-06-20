@@ -1,0 +1,84 @@
+sampletable: pasilla_sampletable.tsv
+sample_dir: pasilla
+assembly: dm6
+data_dir: /data/LCDB/users/dalerr/references
+rules:
+  cutadapt:
+    params:
+      extra: '-a file:adapters.fa --quality-cutoff 20 --minimum-length 25 --overlap 10'
+
+  fastqc:
+    params:
+      extra: ""
+
+  hisat2:
+    params:
+      extra: '--max-intronlen 50000'
+    threads: 8
+
+  fastq_screen:
+      indexes:
+        ecoli: ecoli/bowtie2/ecoli_default
+        wolbachia: wolbachia/bowtie2/wolbachia_default
+        dm6: dm6/bowtie2/dm6_default
+      aligner: bowtie2
+
+  picard_MarkDuplicates:
+    params:
+      extra: "REMOVE_DUPLICATES=true VALIDATION_STRINGENCY=SILENT"
+
+references:
+  -
+    assembly: 'dm6'
+    type: 'gtf'
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/gtf/dmel-all-r6.11.gtf.gz'
+    postprocess: "dm6.gtf_postprocess"
+    tag: 'r6-11'
+    conversions:
+      - 'intergenic'
+  -
+    assembly: 'dm6'
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-chromosome-r6.11.fasta.gz'
+    postprocess: "dm6.fasta_postprocess"
+    type: 'fasta'
+    indexes:
+      - 'bowtie2'
+      - 'hisat2'
+  -
+    assembly: 'dm6'
+    type: 'fasta'
+    tag: 'r6-11_transcriptome'
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-transcript-r6.11.fasta.gz'
+    indexes:
+      - 'kallisto'
+  -
+    assembly: 'hg19'
+    type: 'fasta'
+    url: 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/GRCh37.p13.genome.fa.gz'
+    indexes:
+      - 'bowtie2'
+      - 'hisat2'
+  -
+    assembly: 'hg19'
+    type: 'gtf'
+    url: 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz'
+    tag: 'gencode-v19'
+  -
+    assembly: 'hg19'
+    type: 'fasta'
+    tag: 'gencode_v19_transcriptome'
+    url: 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/gencode.v19.pc_transcripts.fa.gz'
+    indexes:
+      - 'kallisto'
+  -
+    assembly: 'ecoli'
+    type: 'fasta'
+    url: 'ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.fna.gz'
+    indexes:
+      - 'bowtie2'
+  -
+    assembly: 'wolbachia'
+    type: 'fasta'
+    url: 'ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF_000008025.1_ASM802v1/GCF_000008025.1_ASM802v1_genomic.fna.gz'
+    indexes:
+      - 'bowtie2'
