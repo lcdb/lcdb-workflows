@@ -247,7 +247,9 @@ rule featureCounts:
         annoGTF='/data/LCDB/references/dm6/dm6_r6-11.gtf',
         mappingFile='{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
     output:
-        counts='{sample_dir}/{sample}/{sample}_counts.txt'
+        countsFull='{sample_dir}/{sample}/{sample}_counts.full',
+        counts='{sample_dir}/{sample}/{sample}_counts.txt',
+        countSummary='{sample_dir}/{sample}/{sample}_counts.full.summary'
     threads: 5
     params:
         extra="-t exon -g gene_id "

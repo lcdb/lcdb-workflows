@@ -15,7 +15,12 @@ much faster than HTSeq without compromising on accuracy.
 * `GTF`: Genomic Feature annotations are used to identify gene locations
 
 ## Output
-* `Counts`: *counts.txt* contains the number of reads assigned to each meta-feature
+* `countsFull`: *counts.full* contains all feature related information including
+  meta-feature name and counts
+* `counts`: *counts.txt* is a subset of *counts.full* containing only the reads 
+  assigned to each meta-feature e.g. *genes*
+* `countSummary`: *counts.full.summary* lists the counts for each feature type
+  e.g **Assigned 30437**
 
 ## Threads
 Multiple processors supported.
@@ -31,7 +36,9 @@ rule featureCounts:
 		annoGTF="{sample}.gtf",
 		mappingFile="{sample}.bam"
     output:
-        counts="{sample}_counts.txt"
+		countsFull="{sample}_counts.full",
+        counts="{sample}_counts.txt",
+		countSummary="{sample}_counts.full.summary"
 	threads: 5
     params: 
 		extra="-t exon -g gene_id "
