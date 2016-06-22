@@ -2,19 +2,22 @@ sampletable: pasilla_sampletable.tsv
 sample_dir: pasilla
 assembly: dm6
 data_dir: /data/LCDB/references-test
+
 rules:
   cutadapt:
     params:
       extra: '-a file:adapters.fa --quality-cutoff 20 --minimum-length 25 --overlap 10'
 
+  align:
+    aligner: hisat2
+    prefix: dm6/hisat2/dm6_default
+    params:
+      extra: '--max-intronlen=5000'
+    threads: 8
+
   fastqc:
     params:
       extra: ""
-
-  hisat2:
-    params:
-      extra: '--max-intronlen 50000'
-    threads: 8
 
   fastq_screen:
       indexes:
