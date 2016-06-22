@@ -4,13 +4,33 @@ import yaml
 import itertools
 import pandas
 
-sampletable = pandas.read_table(config['sampletable'], index_col=0)
-samples = sampletable.index.tolist()
 try:
     config.update(yaml.load(open('config.yaml')))
 except IOError:
     raise IOError('No "config.yaml" found; please supply another config '
                   ' file using the --configfile argument')
+
+
+# ----------------------------------------------------------------------------
+# Helper functions
+#
+
+
+# srcdir() is a snakemake built-in function. WRAPPERS must be relative to this
+# file.
+HERE = srcdir('')
+WRAPPERS = '../../wrappers'
+def wrapper_for(tool):
+    return os.path.join(HERE, WRAPPERS, tool)
+
+
+def params_for(rule, key):
+    d = config.get('rules', {}).get(rule, {}).get('params', {}).get(key, '')
+    return d
+
+
+def threads_for(rule):
+    return config.get('rules', {}).get(rule, {}).get('threads', {})
 
 
 def fastq_screen_config_inputs():
@@ -27,6 +47,12 @@ def fastq_screen_config_inputs():
         prefix = os.path.join(config['data_dir'], prefix)
         inputs.extend(expand(prefix + '.{n}.bt2', n=[1, 2, 3, 4]))
     return inputs
+
+
+sampletable = pandas.read_table(config['sampletable'], index_col=0)
+samples = sampletable.index.tolist()
+
+include: '../references/references.snakefile'
 
 
 patterns = [
@@ -59,30 +85,9 @@ targets = list(
         )
     )
 )
+# ----------------------------------------------------------------------------
 
 
-# srcdir() is a snakemake built-in function. WRAPPERS must be relative to this
-# file.
-HERE = srcdir('')
-WRAPPERS = '../../wrappers'
-
-
-include: '../references/references.snakefile'
-
-def wrapper_for(tool):
-    """
-    Returns the wrapper directory for the specified tool
-    """
-    return os.path.join(HERE, WRAPPERS, tool)
-
-
-def params_for(rule, key):
-    d = config.get('rules', {}).get(rule, {}).get('params', {}).get(key, '')
-    return d
-
-
-def threads_for(rule):
-    return config.get('rules', {}).get(rule, {}).get('threads', {})
 
 rule all:
     input: targets
