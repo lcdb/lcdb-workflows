@@ -39,6 +39,7 @@ patterns = [
     '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.metrics',
     'multiqc_report.html',
     'fastq_screen_config.txt',
+    fastq_screen_config_inputs(),
 
 ]
 supplied = {'sample': samples, 'sample_dir': config['sample_dir']}
