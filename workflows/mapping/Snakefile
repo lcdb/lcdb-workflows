@@ -84,19 +84,22 @@ patterns = [
     '{sample_dir}/{sample}/{sample}_R1.fastq_screen.png',
     '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastqc.html',
     '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz',
-    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam',
-    '{sample_dir}/{sample}/{sample}.cutadapt.bt2.bam',
-    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.observed_complexity',
-    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_complexity',
-    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_coverage',
-    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.bam',
-    '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.metrics',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.bam',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.observed_complexity',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_complexity',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics',
     'multiqc_report.html',
     'fastq_screen_config.txt',
     fastq_screen_config_inputs(),
-
+    ALIGNER_INDEX,
 ]
-supplied = {'sample': samples, 'sample_dir': config['sample_dir']}
+supplied = {
+    'sample': samples,
+    'sample_dir': config['sample_dir'],
+    'aligner_tag': ALIGNER_TAG,
+}
 
 # Fill in each pattern with each item in "supplied", resulting in a list of
 # lists. Collapse that into a list of strings, and then unique them into a set
@@ -209,44 +212,44 @@ rule fastq_screen:
 
 
 rule samtools_unique:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam'
     params: extra=params_for('samtools_unique', 'extra')
     wrapper:
         wrapper_for('samtools/view')
 
 
 rule samtools_sort:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
     wrapper:
         wrapper_for('samtools/sort')
 
 
 rule samtools_index:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam.bai'
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam.bai'
     wrapper:
         wrapper_for('samtools/index')
 
 
 rule preseq_observed_complexity:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.observed_complexity'
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.observed_complexity'
     wrapper:
         wrapper_for('preseq/observed_complexity')
 
 
 rule preseq_expected_complexity:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_complexity'
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_complexity'
     wrapper:
         wrapper_for('preseq/estimated_complexity')
 
 
 rule preseq_expected_coverage:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.bam.estimated_coverage'
+    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage'
     wrapper:
         wrapper_for('preseq/estimated_coverage')
 
@@ -266,13 +269,13 @@ rule bowtie2:
 
 rule picard_MarkDuplicates:
     input:
-        bam = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam',
-        bai = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.bam.bai'
+        bam = '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam',
+        bai = '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam.bai'
     output:
-        bam = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.bam',
-        metrics = '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.metrics'
+        bam = '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
+        metrics = '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics'
     params: extra=params_for('picard_MarkDuplicates', 'extra')
-    log: '{sample_dir}/{sample}/{sample}.cutadapt.hisat2.unique.sort.dedup.log',
+    log: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.log',
     wrapper:
         wrapper_for('picard/MarkDuplicates')
 
