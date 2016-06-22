@@ -132,6 +132,7 @@ source activate {env_name}
 cd {repo}/{args.workflow}
 ./get-data.sh
 {CLEAN}
+snakemake --unlock --configfile config.yaml
 snakemake -j {threads} -pr --configfile config.yaml
 """
 script_name = 'lcdb-workflows-submit-%s.sh' % (str(uuid.uuid4()).split('-')[0])
