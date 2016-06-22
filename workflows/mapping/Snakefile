@@ -192,7 +192,7 @@ rule fastq_screen_config_file:
             table.append(['DATABASE', label, prefix, aligner.upper()])
 
         with open(output[0], 'w') as fout:
-            fout.write('\n'.join(['\t'.join(i) for i in table]) + '\n')
+            fout.write('\n'.join(['\t'.join(i) for i in sorted(table)]) + '\n')
 
 
 rule fastq_screen:
