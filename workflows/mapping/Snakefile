@@ -6,6 +6,11 @@ import pandas
 
 sampletable = pandas.read_table(config['sampletable'], index_col=0)
 samples = sampletable.index.tolist()
+try:
+    config.update(yaml.load(open('config.yaml')))
+except IOError:
+    raise IOError('No "config.yaml" found; please supply another config '
+                  ' file using the --configfile argument')
 
 
 def fastq_screen_config_inputs():
