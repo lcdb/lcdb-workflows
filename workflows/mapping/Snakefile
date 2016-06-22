@@ -55,6 +55,29 @@ samples = sampletable.index.tolist()
 include: '../references/references.snakefile'
 
 
+# ----------------------------------------------------------------------------
+# Aligner configuration.
+#
+ALIGNER_FASTQ_PATTERN = '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz'
+ALIGNER_BAM_OUTPUT_PATTERN = '{{sample_dir}}/{{sample}}/{{sample}}.cutadapt.{0}.bam'
+ALIGNER_LOG_OUTPUT_PATTERN = '{{sample_dir}}/{{sample}}/{{sample}}.cutadapt.{0}.bam.log'
+ALIGNER = config['rules']['align']['aligner']
+ALIGNER_PREFIX = config['rules']['align']['prefix']
+ALIGNER_TAG= {'bowtie2': 'bt2',  'hisat2': 'ht2'}[ALIGNER]
+
+if ALIGNER == 'hisat2':
+    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.ht2',
+                           data_dir=config['data_dir'], prefix=ALIGNER_PREFIX,
+                           n=range(1, 9))
+
+if ALIGNER == 'bowtie2':
+    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.bt2',
+                           data_dir=config['data_dir'], prefix=ALIGNER_PREFIX,
+                           n=range(1, 5))
+
+# ----------------------------------------------------------------------------
+# Generate final targets
+#
 patterns = [
     '{sample_dir}/{sample}/{sample}_R1.fastqc.html',
     '{sample_dir}/{sample}/{sample}_R1.fastq_screen.txt',
