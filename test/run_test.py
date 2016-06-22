@@ -108,7 +108,7 @@ def create_env(name, repo):
             + requirements(repo)
             +  bcolors.ENDC)
         sp.check_call([
-            'conda', 'env', 'remove', '-n', name])
+            'conda', 'remove', '-n', name, '--all'])
     sp.check_call([
         'conda', 'create', '-n', name, '--file', requirements(repo), '-c', 'bioconda', '-c', 'r', 'python=3', '-y'])
 
