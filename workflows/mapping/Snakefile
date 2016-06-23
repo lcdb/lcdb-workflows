@@ -126,19 +126,19 @@ rule clean:
 
 
 rule fastqc:
-    input: 'pasilla/{sample}/{sample}{suffix}.fastq.gz'
+    input: '{sample_dir}/{sample}/{sample}{suffix}.fastq.gz'
     output:
-        html='pasilla/{sample}/{sample}{suffix}.fastqc.html',
-        zip='pasilla/{sample}/{sample}{suffix}_fastqc.zip',
+        html='{sample_dir}/{sample}/{sample}{suffix}.fastqc.html',
+        zip='{sample_dir}/{sample}/{sample}{suffix}_fastqc.zip',
     params: extra=params_for('fastqc', 'extra')
     wrapper:
         wrapper_for('fastqc')
 
 
 rule cutadapt:
-    input: 'pasilla/{sample}/{sample}_R1.fastq.gz'
-    output: 'pasilla/{sample}/{sample}_R1.cutadapt.fastq.gz'
-    log: 'pasilla/{sample}/{sample}_R1.cutadapt.fastq.log'
+    input: '{sample_dir}/{sample}/{sample}_R1.fastq.gz'
+    output: '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz'
+    log: '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.log'
     params: extra=params_for('cutadapt', 'extra')
     wrapper:
         wrapper_for('cutadapt')
