@@ -26,6 +26,7 @@ rules:
         ecoli: ecoli/bowtie2/ecoli_default
         wolbachia: wolbachia/bowtie2/wolbachia_default
         dm6: dm6/bowtie2/dm6_default
+        sacCer3: sacCer3/bowtie2/sacCer3_default
       aligner: bowtie2
 
   samtools_unique:
@@ -37,6 +38,15 @@ rules:
       extra: "REMOVE_DUPLICATES=true VALIDATION_STRINGENCY=SILENT"
 
 references:
+
+  -
+    assembly: 'sacCer3'
+    type: 'fasta'
+    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/sacCer3/bigZips/chromFa.tar.gz'
+    postprocess: 'sacCer3.fasta_postprocess'
+    indexes:
+        - 'bowtie2'
+
   -
     assembly: 'dm6'
     type: 'gtf'
