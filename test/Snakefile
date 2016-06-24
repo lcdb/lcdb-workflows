@@ -57,7 +57,7 @@ rule all:
 rule clean:
     run:
         shell('rm -r {config[sample_dir]}')
-        shell('./get-data.sh')
+        shell('bash get-data.sh')
 
 
 rule fastqc:

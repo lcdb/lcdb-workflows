@@ -130,7 +130,7 @@ set -e
 
 source activate {env_name}
 cd {repo}/{args.workflow}
-./get-data.sh
+bash get-data.sh
 {CLEAN}
 snakemake --unlock --configfile config.yaml
 snakemake -j {threads} -pr --configfile config.yaml
