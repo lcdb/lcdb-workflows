@@ -56,14 +56,16 @@ ALIGNER_PREFIX = config['rules']['align']['prefix']
 ALIGNER_TAG= {'bowtie2': 'bt2',  'hisat2': 'ht2'}[ALIGNER]
 
 if ALIGNER == 'hisat2':
-    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.ht2',
+    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
                            data_dir=config['data_dir'], prefix=ALIGNER_PREFIX,
-                           n=range(1, 9))
+                           n=range(1, 9),
+                           tag=ALIGNER_TAG)
 
 if ALIGNER == 'bowtie2':
-    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.bt2',
+    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
                            data_dir=config['data_dir'], prefix=ALIGNER_PREFIX,
-                           n=range(1, 5))
+                           n=range(1, 5),
+                           tag=ALIGNER_TAG)
 
 # ----------------------------------------------------------------------------
 # Generate final targets
