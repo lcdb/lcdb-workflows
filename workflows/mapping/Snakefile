@@ -1,0 +1,258 @@
+# -*- snakemake -*-
+
+import yaml
+import itertools
+import pandas
+import sys
+
+try:
+    config.update(yaml.load(open('config.yaml')))
+except IOError:
+    raise IOError('No "config.yaml" found; please supply another config '
+                  ' file using the --configfile argument')
+
+shell.prefix(config.get('shell_prefix', ''))
+
+# ----------------------------------------------------------------------------
+# Helper functions
+#
+HERE = srcdir('')
+WRAPPERS = '../../wrappers'
+sys.path.insert(0, os.path.join(HERE, '../../lcdb'))
+import helpers
+wrapper_for, params_for, threads_for = helpers.workflow_helper_functions(config, HERE, WRAPPERS)
+
+
+def fastq_screen_config_inputs():
+    """
+    Returns indexes and a table (as string) that can be written directly to
+    a config file.
+
+    Use indexes as the input to a rule; use the table to build a config file.
+    """
+    indexes = config['rules']['fastq_screen']['indexes']
+    aligner = config['rules']['fastq_screen']['aligner']
+    inputs = []
+    for label, prefix in indexes.items():
+        prefix = os.path.join(config['data_dir'], prefix)
+        inputs.extend(expand(prefix + '.{n}.bt2', n=[1, 2, 3, 4]))
+    return inputs
+
+
+sampletable = helpers.load_sampletable(config['sampletable'])
+samples = sampletable.index.tolist()
+
+include: '../references/references.snakefile'
+
+
+# ----------------------------------------------------------------------------
+# Aligner configuration.
+#
+ALIGNER_FASTQ_PATTERN = '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz'
+ALIGNER_BAM_OUTPUT_PATTERN = '{{sample_dir}}/{{sample}}/{{sample}}.cutadapt.{0}.bam'
+ALIGNER_LOG_OUTPUT_PATTERN = '{{sample_dir}}/{{sample}}/{{sample}}.cutadapt.{0}.bam.log'
+ALIGNER = config['rules']['align']['aligner']
+ALIGNER_PREFIX = config['rules']['align']['prefix']
+ALIGNER_TAG= {'bowtie2': 'bt2',  'hisat2': 'ht2'}[ALIGNER]
+
+if ALIGNER == 'hisat2':
+    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
+                           data_dir=config['data_dir'], prefix=ALIGNER_PREFIX,
+                           n=range(1, 9),
+                           tag=ALIGNER_TAG)
+
+if ALIGNER == 'bowtie2':
+    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
+                           data_dir=config['data_dir'], prefix=ALIGNER_PREFIX,
+                           n=range(1, 5),
+                           tag=ALIGNER_TAG)
+
+# ----------------------------------------------------------------------------
+# Generate final targets
+#
+patterns = [
+    '{sample_dir}/{sample}/{sample}_R1.fastqc.html',
+    '{sample_dir}/{sample}/{sample}_R1.fastq_screen.txt',
+    '{sample_dir}/{sample}/{sample}_R1.fastq_screen.png',
+    '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastqc.html',
+    '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.bam',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.observed_complexity',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_complexity',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
+    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics',
+    'multiqc_report.html',
+    'fastq_screen_config.txt',
+    fastq_screen_config_inputs(),
+    ALIGNER_INDEX,
+]
+supplied = {
+    'sample': samples,
+    'sample_dir': config['sample_dir'],
+    'aligner_tag': ALIGNER_TAG,
+}
+
+# Fill in each pattern with each item in "supplied", resulting in a list of
+# lists. Collapse that into a list of strings, and then unique them into a set
+# since e.g. expand('a', samples=[1, 2, 3, 4]) results in ['a', 'a', 'a', 'a']
+targets = list(
+    set(
+        itertools.chain(
+            *map(lambda x: expand(x, **supplied), patterns)
+        )
+    )
+)
+# ----------------------------------------------------------------------------
+
+
+
+rule all:
+    input: targets
+
+
+rule clean:
+    run:
+        shell('rm -r {config[sample_dir]}')
+        shell('bash get-data.sh')
+
+
+rule fastqc:
+    input: '{prefix}{suffix}.fastq.gz'
+    output:
+        html='{prefix}{suffix}.fastqc.html',
+        zip='{prefix}{suffix}_fastqc.zip',
+    params: extra=params_for('fastqc', 'extra')
+    wrapper:
+        wrapper_for('fastqc')
+
+
+rule cutadapt:
+    input: '{prefix}.fastq.gz'
+    output: '{prefix}.cutadapt.fastq.gz'
+    log: '{prefix}.cutadapt.fastq.log'
+    params: extra=params_for('cutadapt', 'extra')
+    wrapper:
+        wrapper_for('cutadapt')
+
+
+rule align:
+    input:
+        fastq=ALIGNER_FASTQ_PATTERN,
+        index=ALIGNER_INDEX
+    output: ALIGNER_BAM_OUTPUT_PATTERN.format(ALIGNER_TAG)
+    log: ALIGNER_LOG_OUTPUT_PATTERN.format(ALIGNER_TAG)
+    params: extra=params_for('align', 'extra')
+    threads: threads_for('align')
+    wrapper:
+        wrapper_for(ALIGNER)
+
+
+def multiqc_inputs():
+    inputs = []
+    check_for = ['fastq', 'bam']
+    for i in targets:
+        for j in check_for:
+            if j in i:
+                # Doesn't matter which of `check_for` we found, just *that* we
+                # found one, so we only add the input once.
+                inputs.append(i)
+                break
+    return inputs
+
+
+rule multiqc:
+    input: multiqc_inputs()
+    output: 'multiqc_report.html'
+    log: 'multiqc_report.log'
+    params: analysis_directory=config['sample_dir']
+    wrapper:
+        wrapper_for('multiqc')
+
+
+
+rule fastq_screen_config_file:
+    input: fastq_screen_config_inputs()
+    output: 'fastq_screen_config.txt'
+    run:
+        indexes = config['rules']['fastq_screen']['indexes']
+        aligner = config['rules']['fastq_screen']['aligner']
+        inputs = []
+        table = []
+        for label, prefix in indexes.items():
+            prefix = os.path.join(config['data_dir'], prefix)
+            table.append(['DATABASE', label, prefix, aligner.upper()])
+
+        with open(output[0], 'w') as fout:
+            fout.write('\n'.join(['\t'.join(i) for i in sorted(table)]) + '\n')
+
+
+rule fastq_screen:
+    input:
+        '{prefix}.fastq.gz',
+        'fastq_screen_config.txt'
+    output:
+        txt='{prefix}.fastq_screen.txt',
+        png='{prefix}.fastq_screen.png'
+    log: '{prefix}.fastq_screen.log'
+    params: fastq_screen_config='fastq_screen_config.txt'
+    wrapper:
+        wrapper_for('fastq_screen')
+
+
+rule samtools_unique:
+    input: '{prefix}.cutadapt.{aligner_tag}.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.bam'
+    params: extra=params_for('samtools_unique', 'extra')
+    wrapper:
+        wrapper_for('samtools/view')
+
+
+rule samtools_sort:
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
+    wrapper:
+        wrapper_for('samtools/sort')
+
+
+rule samtools_index:
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam.bai'
+    wrapper:
+        wrapper_for('samtools/index')
+
+
+rule preseq_observed_complexity:
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.bam.observed_complexity'
+    wrapper:
+        wrapper_for('preseq/observed_complexity')
+
+
+rule preseq_expected_complexity:
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.bam.estimated_complexity'
+    wrapper:
+        wrapper_for('preseq/estimated_complexity')
+
+
+rule preseq_expected_coverage:
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage'
+    wrapper:
+        wrapper_for('preseq/estimated_coverage')
+
+
+rule picard_MarkDuplicates:
+    input:
+        bam = '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam',
+        bai = '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam.bai'
+    output:
+        bam = '{prefix}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
+        metrics = '{prefix}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics'
+    params: extra=params_for('picard_MarkDuplicates', 'extra')
+    log: '{prefix}.cutadapt.{aligner_tag}.unique.sort.dedup.log',
+    wrapper:
+        wrapper_for('picard/MarkDuplicates')
+
+# vim: ft=python
