@@ -118,19 +118,19 @@ rule clean:
 
 
 rule fastqc:
-    input: '{sample_dir}/{sample}/{sample}{suffix}.fastq.gz'
+    input: '{prefix}{suffix}.fastq.gz'
     output:
-        html='{sample_dir}/{sample}/{sample}{suffix}.fastqc.html',
-        zip='{sample_dir}/{sample}/{sample}{suffix}_fastqc.zip',
+        html='{prefix}{suffix}.fastqc.html',
+        zip='{prefix}{suffix}_fastqc.zip',
     params: extra=params_for('fastqc', 'extra')
     wrapper:
         wrapper_for('fastqc')
 
 
 rule cutadapt:
-    input: '{sample_dir}/{sample}/{sample}_R1.fastq.gz'
-    output: '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz'
-    log: '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.log'
+    input: '{prefix}.fastq.gz'
+    output: '{prefix}.cutadapt.fastq.gz'
+    log: '{prefix}.cutadapt.fastq.log'
     params: extra=params_for('cutadapt', 'extra')
     wrapper:
         wrapper_for('cutadapt')
@@ -189,69 +189,69 @@ rule fastq_screen_config_file:
 
 rule fastq_screen:
     input:
-        '{sample_dir}/{sample}/{sample}_R1.fastq.gz',
+        '{prefix}.fastq.gz',
         'fastq_screen_config.txt'
     output:
-        txt='{sample_dir}/{sample}/{sample}_R1.fastq_screen.txt',
-        png='{sample_dir}/{sample}/{sample}_R1.fastq_screen.png'
-    log: '{sample_dir}/{sample}/{sample}_R1.fastq_screen.log'
+        txt='{prefix}.fastq_screen.txt',
+        png='{prefix}.fastq_screen.png'
+    log: '{prefix}.fastq_screen.log'
     params: fastq_screen_config='fastq_screen_config.txt'
     wrapper:
         wrapper_for('fastq_screen')
 
 
 rule samtools_unique:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam'
+    input: '{prefix}.cutadapt.{aligner_tag}.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.bam'
     params: extra=params_for('samtools_unique', 'extra')
     wrapper:
         wrapper_for('samtools/view')
 
 
 rule samtools_sort:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
     wrapper:
         wrapper_for('samtools/sort')
 
 
 rule samtools_index:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam.bai'
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam.bai'
     wrapper:
         wrapper_for('samtools/index')
 
 
 rule preseq_observed_complexity:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.observed_complexity'
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.bam.observed_complexity'
     wrapper:
         wrapper_for('preseq/observed_complexity')
 
 
 rule preseq_expected_complexity:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_complexity'
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.bam.estimated_complexity'
     wrapper:
         wrapper_for('preseq/estimated_complexity')
 
 
 rule preseq_expected_coverage:
-    input: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam'
-    output: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage'
+    input: '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam'
+    output: '{prefix}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage'
     wrapper:
         wrapper_for('preseq/estimated_coverage')
 
 
 rule picard_MarkDuplicates:
     input:
-        bam = '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam',
-        bai = '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.bam.bai'
+        bam = '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam',
+        bai = '{prefix}.cutadapt.{aligner_tag}.unique.sort.bam.bai'
     output:
-        bam = '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
-        metrics = '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics'
+        bam = '{prefix}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
+        metrics = '{prefix}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics'
     params: extra=params_for('picard_MarkDuplicates', 'extra')
-    log: '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.log',
+    log: '{prefix}.cutadapt.{aligner_tag}.unique.sort.dedup.log',
     wrapper:
         wrapper_for('picard/MarkDuplicates')
 
