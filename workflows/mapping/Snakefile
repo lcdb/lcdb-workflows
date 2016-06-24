@@ -3,6 +3,7 @@
 import yaml
 import itertools
 import pandas
+import sys
 
 try:
     config.update(yaml.load(open('config.yaml')))
@@ -10,27 +11,16 @@ except IOError:
     raise IOError('No "config.yaml" found; please supply another config '
                   ' file using the --configfile argument')
 
+shell.prefix(config.get('shell_prefix', ''))
 
 # ----------------------------------------------------------------------------
 # Helper functions
 #
-
-
-# srcdir() is a snakemake built-in function. WRAPPERS must be relative to this
-# file.
 HERE = srcdir('')
 WRAPPERS = '../../wrappers'
-def wrapper_for(tool):
-    return os.path.join(HERE, WRAPPERS, tool)
-
-
-def params_for(rule, key):
-    d = config.get('rules', {}).get(rule, {}).get('params', {}).get(key, '')
-    return d
-
-
-def threads_for(rule):
-    return config.get('rules', {}).get(rule, {}).get('threads', {})
+sys.path.insert(0, os.path.join(HERE, '../../lcdb'))
+import helpers
+wrapper_for, params_for, threads_for = helpers.workflow_helper_functions(config, HERE, WRAPPERS)
 
 
 def fastq_screen_config_inputs():
@@ -49,7 +39,7 @@ def fastq_screen_config_inputs():
     return inputs
 
 
-sampletable = pandas.read_table(config['sampletable'], index_col=0)
+sampletable = helpers.load_sampletable(config['sampletable'])
 samples = sampletable.index.tolist()
 
 include: '../references/references.snakefile'
