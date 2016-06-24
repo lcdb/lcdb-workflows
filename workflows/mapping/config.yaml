@@ -3,6 +3,8 @@ sample_dir: pasilla
 assembly: dm6
 data_dir: /data/LCDB/references-test
 
+shell_prefix: "source lcdb-workflows.bashrc; "
+
 rules:
   cutadapt:
     params:
