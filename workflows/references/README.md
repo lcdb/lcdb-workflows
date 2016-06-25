@@ -87,8 +87,14 @@ importable by the `reference.snakefile`. The dotted name should refer to
 a function that has the function signature:
 
 ```python
-def func(downloaded_filename, postprocessed_filename)
+def func(temp_downloaded_filenames, final_postprocessed_filename)
 ```
+
+These two arguments are automatically provided by the references workflow --
+you don't have to know or care exactly what the filenames are, just what has to
+be done to their contents. The first argument is a list corresponding to the
+tempfiles downloaded for each provided url; the second is the final filename to
+create.
 
 The job of a postprocessing function is to ensure that the
 fastq/gtf/transcriptome fasta meets the requirements below and is ready for any

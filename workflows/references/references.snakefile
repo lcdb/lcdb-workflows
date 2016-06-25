@@ -56,13 +56,14 @@ def download_and_postprocess(outfile):
         func = default_postprocess
     else:
         func = resolve_name(name)
-    url = block['url']
-    if outfile.endswith('.gz'):
-        gz = '.gz'
-    else:
-        gz = ''
-    shell("wget {url} -O- > {outfile}.tmp{gz}")
-    func(outfile + '.tmp' + gz, outfile)
+    urls = block['url']
+    if isinstance(urls, str):
+        urls = [urls]
+    tmpfiles = ['{0}.{1}.tmp'.format(outfile, i) for i in range(len(urls))]
+    for url, tmpfile in zip(urls, tmpfiles):
+        shell("wget {url} -O- > {tmpfile}")
+
+    func(tmpfiles, outfile)
 
 data_dir = config['data_dir']
 if not os.path.exists(data_dir):
