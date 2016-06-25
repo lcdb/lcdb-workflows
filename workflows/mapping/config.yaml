@@ -85,8 +85,11 @@ references:
   -
     assembly: 'hg19'
     type: 'fasta'
-    tag: 'gencode_v19_transcriptome'
-    url: 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/gencode.v19.pc_transcripts.fa.gz'
+    tag: 'gencode_v19_plus_lncRNA_transcriptome'
+    url:
+      - 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/gencode.v19.pc_transcripts.fa.gz'
+      - 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/gencode.v19.lncRNA_transcripts.fa.gz'
+    postprocess: "hg19.plus_lncrna_fasta_postprocess"
     indexes:
       - 'kallisto'
   -
