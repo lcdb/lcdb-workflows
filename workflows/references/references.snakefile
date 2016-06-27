@@ -56,13 +56,14 @@ def download_and_postprocess(outfile):
         func = default_postprocess
     else:
         func = resolve_name(name)
-    url = block['url']
-    if outfile.endswith('.gz'):
-        gz = '.gz'
-    else:
-        gz = ''
-    shell("wget {url} -O- > {outfile}.tmp{gz}")
-    func(outfile + '.tmp' + gz, outfile)
+    urls = block['url']
+    if isinstance(urls, str):
+        urls = [urls]
+    tmpfiles = ['{0}.{1}.tmp'.format(outfile, i) for i in range(len(urls))]
+    for url, tmpfile in zip(urls, tmpfiles):
+        shell("wget {url} -O- > {tmpfile}")
+
+    func(tmpfiles, outfile)
 
 data_dir = config['data_dir']
 if not os.path.exists(data_dir):
@@ -76,9 +77,9 @@ ext_mapping = {
     'fasta': '.fa.gz',
 }
 index_mapping = {
-    'bowtie2': ('{assembly}/bowtie2/{assembly}{tag}.{n}.bt2', dict(n=[1, 2, 3, 4])),
-    'hisat2': ('{assembly}/hisat2/{assembly}{tag}.{n}.ht2', dict(n=range(1, 9))),
-    'kallisto': ('{assembly}/kallisto/{assembly}{tag}.idx', dict()),
+    'bowtie2': ('{data_dir}/{assembly}/bowtie2/{assembly}{tag}.{n}.bt2', dict(n=[1, 2, 3, 4])),
+    'hisat2': ('{data_dir}/{assembly}/hisat2/{assembly}{tag}.{n}.ht2', dict(n=range(1, 9))),
+    'kallisto': ('{data_dir}/{assembly}/kallisto/{assembly}{tag}.idx', dict()),
 }
 references_targets = []
 for block in config['references']:
@@ -94,7 +95,7 @@ for block in config['references']:
         for index in indexes:
             pattern, kwargs = index_mapping[index]
             kwargs = kwargs.copy()
-            references_targets.extend(expand(pattern, assembly=assembly, tag=tag,  **kwargs))
+            references_targets.extend(expand(pattern, assembly=assembly, tag=tag, data_dir=data_dir, **kwargs))
 
 
 rule all_references:

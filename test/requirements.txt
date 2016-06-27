@@ -12,3 +12,4 @@ bowtie2>=2.2.8
 picard>=2.3.0-0
 bioconductor-dupradar
 subread
+kallisto

@@ -1,10 +1,21 @@
 # References workflow
 
-## Quick start
+This workflow can be called from other workflows that depend on reference
+fastas, indexes, and annotations. In that case, rules in this workflow will
+only be run for those files asked for in the parent workflow.
+
+This workflow can also be called on its own, in which case it will build
+**all** of the references and indexes specified in the config. This can be
+helpful when setting up the workflows for the first time on a new machine. Run
+it like this:
 
 ```bash
-snakemake --configfile references_config.yaml -s references.snakefile
+snakemake -s references.snakefile --configfile ../mapping/config.yaml
 ```
+
+In both cases, it depends on the `references` section being in the global
+config dictionary; see below for details.
+
 ## Overview
 
 The references workflow is intended to be a universal workflow that supports
@@ -12,8 +23,8 @@ arbitrary genomes and results in FASTAs, indexes, annotations, and various
 processed versions of these files. It is based on the idea that while each
 genome's source files (FASTA, GTF) may come from different places and have
 slightly different formatting, once they are well-formatted they can be used to
-create a hisat2 index, a list of genes, and so on without any further
-customization.
+create a hisat2 index, a list of genes, intergenic regions, and so on without
+any further customization.
 
 The config file allows very flexible specification of how to
 create the files by providing a sort of plugin architecture.
@@ -25,6 +36,8 @@ for contamination).
 
 ```yaml
 
+# The following config is part of the main config.yaml, rather than
+# a standalone file
 
 data_dir: /data/LCDB/references
 references:
@@ -71,12 +84,12 @@ references:
 ```
 
 Each block describes either a fasta or gtf file. Each block has at least the
-assembly, type, and a URL.  They can also have a `postprocess`, which is an arbitrary
-function (described below) that converts the downloaded URL to something that
-conforms to the standards of the workflow (also described below). By supplying
-a tag, we can differentiate between different versions (e.g., FlyBase r6.04 vs
-r6.11) or different kinds of postprocessing (e.g, "chr" preprended to chrom
-names or not).
+assembly, type, and a URL.  They can also have a `postprocess`, which is an
+arbitrary function (described below) that converts the downloaded URL to
+something that conforms to the standards of the workflow (also described
+below). By supplying a tag, we can differentiate between different versions
+(e.g., FlyBase r6.04 vs r6.11) or different kinds of postprocessing (e.g, "chr"
+preprended to chrom names or not).
 
 Blocks with a type of "fasta" can have an optional  `indexes` entry which will
 build the specified indexes.
@@ -87,8 +100,14 @@ importable by the `reference.snakefile`. The dotted name should refer to
 a function that has the function signature:
 
 ```python
-def func(downloaded_filename, postprocessed_filename)
+def func(temp_downloaded_filenames, final_postprocessed_filename)
 ```
+
+These two arguments are automatically provided by the references workflow --
+you don't have to know or care exactly what the filenames are, just what has to
+be done to their contents. The first argument is a list corresponding to the
+tempfiles downloaded for each provided url; the second is the final filename to
+create.
 
 The job of a postprocessing function is to ensure that the
 fastq/gtf/transcriptome fasta meets the requirements below and is ready for any
@@ -103,7 +122,7 @@ def fasta_postprocess(origfn, newfn):
 
 Note that the file is uncompressed in order to fix the chromosome naming and
 then recompressed into the final output. In this case the original file is
-removed.  We specify this function to be called in the fasta config block, like
+removed.  We specify this function to be called in the fasta config block like
 this (note that the module doesn't have to be the same name as the assembly,
 but it is here for clarity):
 
@@ -113,6 +132,10 @@ dm6:
     url: ...
     postprocess: "dm6.fasta_postprocess"
 ```
+
+This expects a file `dm6.py` in the same directory as the
+`references.snakefile` workflow, and expects a function `fasta_postprocess` to
+be defined in that module.
 
 Any downstream rules that operate on the genome FASTA file (like hisat2 index,
 bowtie2 index, etc) will now use this fixed version with "chr" prepended to
