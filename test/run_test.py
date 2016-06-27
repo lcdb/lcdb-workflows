@@ -6,8 +6,9 @@ import os
 import uuid
 import sys
 
-env_name = 'lcdb-workflows-%s-env' % os.environ['USER']
-
+HERE = os.path.realpath(os.path.dirname(__file__))
+ENV_NAME = 'lcdb-workflows-%s-env' % os.environ['USER']
+REQUIREMENTS = os.path.join(HERE, 'requirements.txt')
 BLUE = '\033[94m'
 GREEN = '\033[92m'
 YELLOW = '\033[93m'
@@ -20,7 +21,7 @@ ap.add_argument('repo', help='Path to lcdb-workflows directory to test')
 
 ap.add_argument(
     '--build-env', action='store_true',
-    help='Build environment "%s"' % env_name)
+    help='Build environment "%s"' % ENV_NAME)
 
 ap.add_argument(
     '--no-test', action='store_true',
@@ -56,6 +57,12 @@ ap.add_argument(
 
 args = ap.parse_args()
 
+if args.config:
+    CONFIG = args.config
+
+else:
+    CONFIG = os.path.join(os.path.dirname(args.workflow), 'config.yaml')
+
 # If no threads supplied and we're on an interactive node, use as many CPUs as
 # are allocated.
 if args.threads is None:
@@ -66,14 +73,6 @@ if args.threads is None:
 else:
     threads = args.threads
 
-
-REPO = os.path.abspath(args.repo)
-
-print(bcolors.OKBLUE + "Using repo: " + REPO + bcolors.ENDC)
-
-def requirements(repo):
-    "Path to requirements.txt in the repo"
-    return os.path.join(repo, 'test', 'requirements.txt')
 
 def env_exists(name):
     """
@@ -89,17 +88,17 @@ def env_exists(name):
         )
     )
 
-def create_env(name, repo):
+def create_env(name):
     """
     Remove environment if it exists and build a new one.
     """
     if env_exists(name):
         print(
-            bcolors.WARNING
+            YELLOW
             + 'conda env '
             + name + ' exists, removing and rebuilding based on '
             + requirements(repo)
-            +  bcolors.ENDC)
+            +  ENDC)
         sp.check_call([
             'conda', 'remove', '-n', name, '--all'])
     sp.check_call([
@@ -107,10 +106,13 @@ def create_env(name, repo):
 
 
 if args.build_env:
-    create_env(env_name, REPO)
+    create_env(ENV_NAME)
+
+DIRECTORY = os.path.dirname(args.workflow)
+SNAKEMAKE = "snakemake --directory {DIRECTORY} -s {args.workflow}".format(**locals())
 
 if args.clean:
-    CLEAN = "snakemake clean --configfile config.yaml"
+    CLEAN = SNAKEMAKE + ' clean'
 else:
     CLEAN = ""
 
@@ -118,20 +120,15 @@ else:
 # command.
 script = """\
 #!/bin/bash
-
-set -e
-
-source activate {env_name}
-cd {repo}/{args.workflow}
-bash get-data.sh
+set -eo pipefail
+source activate {ENV_NAME}
 {CLEAN}
-snakemake --unlock --configfile config.yaml
-snakemake -j {threads} -pr --configfile config.yaml
+{SNAKEMAKE} -j {threads} -p -r -T --verbose --configfile {CONFIG}
 """
 script_name = 'lcdb-workflows-submit-%s.sh' % (str(uuid.uuid4()).split('-')[0])
 with open(script_name, 'w') as fout:
-    fout.write(script.format(args=args, env_name=env_name, repo=REPO, threads=threads, CLEAN=CLEAN))
-print(bcolors.OKBLUE + "Wrote " + script_name  + bcolors.ENDC)
+    fout.write(script.format(**locals()))
+print(BLUE + "Wrote " + script_name  + ENDC)
 
 if args.sbatch:
     cmd = [
@@ -143,6 +140,4 @@ if args.sbatch:
     sp.check_call(cmd)
     sys.exit(0)
 
-elif not args.no_test:
-    print(bcolors.OKBLUE + "Running " + script_name + bcolors.ENDC)
     sp.check_call(['bash', script_name])
