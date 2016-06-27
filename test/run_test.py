@@ -17,7 +17,10 @@ ENDC = '\033[0m'
 
 ap = argparse.ArgumentParser()
 
-ap.add_argument('repo', help='Path to lcdb-workflows directory to test')
+ap.add_argument(
+    'workflow',
+    default='test/Snakefile',
+    help='Which workflow to test (path to snakefile)')
 
 ap.add_argument(
     '--build-env', action='store_true',
@@ -30,7 +33,7 @@ ap.add_argument(
 
 ap.add_argument(
     '--clean', action='store_true',
-    help="Delete the test data directory and re-download data.")
+    help="Run the 'clean' rule of the snakefile before calling it a second time")
 
 ap.add_argument(
     '--sbatch', action='store_true',
@@ -43,7 +46,8 @@ ap.add_argument(
     --cpus-per-task; if $SLURM_CPUS_PER_TASK exists (that is, you're on an
     interactive node) use that; otherwise assume running on a node with this
     many cores.  Snakemake will be run with the -j argument set to this many
-    threads.''')
+    threads. If --cluster is specified, this has no effect (the cluster
+    submission command limits the number of jobs to 999)''')
 
 ap.add_argument(
     '--mem',
@@ -51,9 +55,15 @@ ap.add_argument(
     help='Memory to request. Only has an effect if --sbatch also specified.')
 
 ap.add_argument(
-    '--workflow',
-    default='test',
-    help='Which workflow to test')
+    '--cluster',
+    action='store_true',
+    help='Instead of submitting a single job to the cluster, build a submit '
+    'script and cluster config and submit that to the cluster')
+
+ap.add_argument(
+    '--config',
+    help='''Specify a default config file. The default is to use the
+    config.yaml file in the same directory as the specified workflow.''')
 
 args = ap.parse_args()
 
@@ -140,4 +150,19 @@ if args.sbatch:
     sp.check_call(cmd)
     sys.exit(0)
 
+elif args.cluster:
+    # run the separate submit script so that it can do the config parsing and
+    # cluster-config.yaml building work
+    cmd = [
+        'python', 'lcdb/lcdb-submit.py',
+        '--config', CONFIG,
+        '--workflow', args.workflow,
+        '--cluster-config', 'test-cluster-config.yaml',
+        '--output', script_name,
+        '--pre-block', CLEAN
+    ]
+    sp.check_call(cmd)
+
+if not args.no_test:
+    print(BLUE + "Running " + script_name + ENDC)
     sp.check_call(['bash', script_name])
