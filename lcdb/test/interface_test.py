@@ -14,19 +14,19 @@ sample_dir: ../../pasilla
 assembly: dm6
 data_dir: /data/LCDB/references
 
-rawLevel: '../../test/passilla/{sampleID}/{sampleID}_R1'
-runLevel: '../../test/passilla_sample/{sampleID}/{sampleID}_R1'
-sampleLevel: '../../test/passilla_sample/{sampleID}/{sampleID}'
+rawLevel: '../../test/passilla/{sampleID}/{sampleID}_{treatment}_{replicate}_0001_R1'
+runLevel: '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}_{replicate}_R1'
+sampleLevel: '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}'
 aggLevel: '../../test/passilla_agg'
 aggLevel2:
     - '../../test/{treatment}'
 """
 
 samples = [
-    {'sampleID': 'treated1', 'replicate': 1, 'treatment': 'treated'}, 
-    {'sampleID': 'treated2', 'replicate': 2, 'treatment': 'treated'}, 
-    {'sampleID': 'untreated1', 'replicate': 1, 'treatment': 'untreated'}, 
-    {'sampleID': 'untreated2', 'replicate': 2, 'treatment': 'untreated'} 
+    {'sampleID': 'treated1', 'replicate': '1', 'treatment': 'treated'}, 
+    {'sampleID': 'treated2', 'replicate': '2', 'treatment': 'treated'}, 
+    {'sampleID': 'untreated1', 'replicate': '1', 'treatment': 'untreated'}, 
+    {'sampleID': 'untreated2', 'replicate': '2', 'treatment': 'untreated'} 
 ]
 
 
@@ -49,15 +49,15 @@ class TestSampleHandler(unittest.TestCase):
 
     def test_find_level_raw(self):
         prefix = self.config['rawLevel'].format_map(samples[0])
-        self.assertEqual('rawLevel', self.SH.find_level(prefix))
+        self.assertEqual('rawLevel', self.SH.find_level(prefix)[0])
 
     def test_find_level_run(self):
         prefix = self.config['runLevel'].format_map(samples[0])
-        self.assertEqual('runLevel', self.SH.find_level(prefix))
+        self.assertEqual('runLevel', self.SH.find_level(prefix)[0])
 
     def test_find_level_sample(self):
         prefix = self.config['sampleLevel'].format_map(samples[0])
-        self.assertEqual('sampleLevel', self.SH.find_level(prefix))
+        self.assertEqual('sampleLevel', self.SH.find_level(prefix)[0])
 
     def test_find_level_bad_pattern(self):
         prefix = '../../test/{sampleID}/{sampleID}/{sampleID}'.format_map(samples[0])
@@ -65,11 +65,11 @@ class TestSampleHandler(unittest.TestCase):
             self.SH.find_level(prefix)
 
     def test_find_sample(self):
-        prefix = self.config['runLevel'].format_map(samples[0])
-        print(prefix)
-        _samples = self.SH.find_sample(prefix)
+        prefix = self.config['rawLevel'].format_map(samples[0])
+        _samples = self.SH.find_sample(self.SH.raw, prefix)
         print(_samples)
-        self.assertEqual(_samples, samples[0])
+        print(samples[0])
+        self.assertDictEqual(_samples, samples[0])
 
     def test_make_input(self):
         wildcards = {'prefix': self.config['runLevel'].format_map(self.SH.samples[0])}

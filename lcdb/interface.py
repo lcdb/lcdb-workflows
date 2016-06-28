@@ -23,14 +23,15 @@ class SampleHandler(object):
         }
 
     def _compile(self, level):
-        return list(set([self.config[level].format_map(x) for x in self.samples]))
+        #return list(set([self.config[level].format_map(x) for x in self.samples]))
+        return regex(self.config[level])
 
     def _compile_regex(self):
         """ Build all possible prefixes for each level """
         self.raw = self._compile('rawLevel')
         self.run = self._compile('runLevel')
         self.sample = self._compile('sampleLevel')
-        self.agg = self.config['aggLevel']
+        self.agg = self._compile('aggLevel')
 
     def _load_sample_table(self):
         """ Import the sample table and make a dictionary version too. 
@@ -46,27 +47,27 @@ class SampleHandler(object):
 
     def find_level(self, prefix):
         """ Figure out which regex the prefix matches. """
-        if prefix in self.raw:
-            return 'rawLevel'
-        elif prefix in self.run:
-            return 'runLevel'
-        elif prefix in self.sample:
-            return 'sampleLevel'
-        elif prefix == self.config['aggLevel']:
+        if re.match(self.raw, prefix):
+            return 'rawLevel', self.find_sample(self.raw, prefix)
+        elif re.match(self.run, prefix):
+            return 'runLevel', self.find_sample(self.run, prefix)
+        elif re.match(self.sample, prefix):
+            return 'sampleLevel', self.find_sample(self.sample, prefix)
+        elif re.match(self.agg, prefix):
             return 'aggLevel'
         else:
             raise ValueError
 
-    def find_sample(self, prefix):
+    def find_sample(self, pattern, prefix):
         """ Find which sample(s) to use """
-        pass
+        m = re.match(pattern, prefix)
+        return m.groupdict()
 
     def make_input(self, suffix, agg=False):
         """ Generates Input Function based on wildcards """
         def _input(wildcards):
             if agg:
-                level = self.find_level(wildcards['prefix'])
-                _samples = self.find_sample(wildcards['prefix'])
+                level, _samples = self.find_level(wildcards['prefix'])
                 return expand('{prefix}{ext}', prefix=wildcards['prefix'], ext=suffix)
             else:
                 return expand('{prefix}{ext}', prefix=wildcards['prefix'], ext=suffix)
