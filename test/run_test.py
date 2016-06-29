@@ -107,12 +107,12 @@ def create_env(name):
             YELLOW
             + 'conda env '
             + name + ' exists, removing and rebuilding based on '
-            + requirements(repo)
-            +  ENDC)
+            + REQUIREMENTS
+            + ENDC)
         sp.check_call([
             'conda', 'remove', '-n', name, '--all'])
     sp.check_call([
-        'conda', 'create', '-n', name, '--file', requirements(repo), '-c', 'bioconda', '-c', 'r', 'python=3', '-y'])
+        'conda', 'create', '-n', name, '--file', REQUIREMENTS, '-c', 'bioconda', '-c', 'r', 'python=3', '-y'])
 
 
 if args.build_env:
