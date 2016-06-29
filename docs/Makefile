@@ -1,6 +1,7 @@
 # Makefile for Sphinx documentation
 #
 
+
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
@@ -52,13 +53,36 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
+	rm -rf $(DAGPNGS)
+	rm -rf $(RULEGRAPHPNGS)
+
+#-----------------------------------------------------------------------------
+# dag-building
+#
+# List of workflows for which we should build dag images
+WORKFLOWS = references mapping
+
 # The config to use for building dags
 CONFIG = ../workflows/mapping/config.yaml
+
+# Figures out the output files that should be built
+RULEGRAPHPNGS = $(addprefix source/images/,$(addsuffix _dag.png,$(WORKFLOWS)))
+DAGPNGS = $(addprefix source/images/,$(addsuffix _full_dag.png,$(WORKFLOWS)))
+
+dags: $(DAGPNGS) $(RULEGRAPHPNGS)
+
+source/images/%_full_dag.png: ../workflows/%/Snakefile $(CONFIG)
+	bash ./make_dags.sh $* $(CONFIG) dag
+
+source/images/%_dag.png: ../workflows/%/Snakefile $(CONFIG)
+	bash ./make_dags.sh $* $(CONFIG) rulegraph
+#-----------------------------------------------------------------------------
+
 source/config.yaml: $(CONFIG)
 	cp $(CONFIG) $@
 
 .PHONY: html
-html:
+html: dags source/config.yaml
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
