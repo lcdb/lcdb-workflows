@@ -1,0 +1,8 @@
+Mapping workflow
+================
+
+.. image:: images/mapping_dag.png
+    :width: 400px
+
+.. image:: images/mapping_full_dag.png
+    :width: 400px
