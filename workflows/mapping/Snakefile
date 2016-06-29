@@ -24,7 +24,6 @@ wrapper_for, params_for, threads_for = helpers.workflow_helper_functions(config,
 
 from interface import SampleHandler
 
-ruleorder: align > merge_bam
 
 def fastq_screen_config_inputs():
     """
@@ -79,7 +78,7 @@ patterns = [
     '{runLevel}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage',
     '{runLevel}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
     '{runLevel}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics',
-    '{sampleLevel}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam',
+    '{aggLevel}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam',
     'multiqc_report.html',
     'fastq_screen_config.txt',
 ] + fastq_screen_config_inputs() + ALIGNER_INDEX
@@ -238,8 +237,9 @@ rule picard_MarkDuplicates:
         wrapper_for('picard/MarkDuplicates')
 
 rule merge_bam:
-    input: SH.make_input(suffix='.unique.sort.dedup.bam', agg=True)
-    output: '{prefix}.merged.unique.sort.dedup.bam'
+    input: SH.make_input(prefix='prefix', midfix='.cutadapt.{aligner_tag}', suffix='.unique.sort.dedup.bam', agg=True)
+    output: '{prefix}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam'
     wrapper:
         wrapper_for('samtools/merge')
+
 # vim: ft=python

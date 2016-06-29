@@ -17,7 +17,7 @@ data_dir: /data/LCDB/references
 rawLevel: '../../test/passilla/{sampleID}/{sampleID}_{treatment}_{replicate}_0001_R1'
 runLevel: '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}_{replicate}_R1'
 sampleLevel: '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}'
-aggLevel: '../../test/passilla_agg'
+aggLevel: '../../test/passilla_agg/{treatment}'
 aggLevel2:
     - '../../test/{treatment}'
 """
@@ -113,14 +113,16 @@ class TestSampleHandler(unittest.TestCase):
         _input = self.SH.make_input(suffix='.fastq', agg=True)
         self.assertEqual(_input(wildcards), [runInput + '.fastq'])
 
-    def test_make_input_sample_agg_lookup(self):
+    def test_make_input_sample_agg_additional_prefix(self):
         wildcards = {
                 'prefix': self.config['sampleLevel'].format_map(self.SH.samples[0]),
-                'ext': '.sort.bam'
-                }
-        runInput = self.config['runLevel'].format_map(self.SH.samples[0])
-        _input = self.SH.make_input(suffix='ext', lookup=True, agg=True)
-        self.assertEqual(_input(wildcards), [runInput + '.sort.bam'])
+                'midfix': '.cutadapt.bt2',
+                'suffix': '.unique.sort.dedup.bam'}
+
+        runInput = self.config['runLevel'].format_map(self.SH.samples[0]) + '.cutadapt.bt2.unique.sort.dedup.bam'
+
+        _input = self.SH.make_input(prefix='prefix', midfix='midfix', suffix='suffix', agg=True)
+        self.assertEqual(_input(wildcards), [runInput])
 
     def test_build_targets(self):
         targets = [
