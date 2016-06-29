@@ -24,6 +24,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="lcdb-workflows 0.1 documentation" href="index.html" />
+    <link rel="next" title="Testing" href="testing.html" />
+    <link rel="prev" title="LCDB workflows" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -40,21 +42,23 @@
             
   <div class="section" id="first-time-setup">
 <h1>First-time setup<a class="headerlink" href="#first-time-setup" title="Permalink to this headline">¶</a></h1>
-<ol class="arabic">
-<li><p class="first">Install <cite>conda</cite></p>
+<ol class="arabic simple">
+<li>Install <cite>conda</cite>.</li>
+</ol>
 <p><cite>lcdb-workflows</cite> depends heavily on the <cite>conda</cite> package manager to ensure
 reproducible environments. If you don&#8217;t already have <cite>conda</cite>, install
 <a class="reference external" href="http://conda.pydata.org/miniconda.html">miniconda</a> (Python 3 version
 recommended).</p>
-</li>
+<ol class="arabic" start="2">
 <li><p class="first">Clone the repository:</p>
 <p>git clone <a class="reference external" href="https://github.com/lcdb/lcdb-workflows.git">https://github.com/lcdb/lcdb-workflows.git</a></p>
 </li>
-<li><p class="first">Run the tests. Set <cite>&#8211;threads</cite> to as many cores as you have on your machine.
-With 8 cores, this takes about 6 min:</p>
-<p>test/run_test.py workflows/mapping/Snakefile &#8211;clean &#8211;build-env &#8211;threads 8</p>
-</li>
 </ol>
+<p>3. Run the tests. Set <cite>&#8211;threads</cite> to as many cores as you have on your machine.
+With 8 cores, this takes about 6 min:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">test</span><span class="o">/</span><span class="n">run_test</span><span class="o">.</span><span class="n">py</span> <span class="n">workflows</span><span class="o">/</span><span class="n">mapping</span><span class="o">/</span><span class="n">Snakefile</span> <span class="o">--</span><span class="n">clean</span> <span class="o">--</span><span class="n">build</span><span class="o">-</span><span class="n">env</span> <span class="o">--</span><span class="n">threads</span> <span class="mi">8</span>
+</pre></div>
+</div>
 <p>The output will be in <cite>workflows/mapping/pasilla</cite>.</p>
 </div>
 <div class="section" id="subsequent-setup">
@@ -78,6 +82,8 @@ a new working directory.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">LCDB workflows</a></li>
+      <li>Next: <a href="testing.html" title="next chapter">Testing</a></li>
   </ul></li>
 </ul>
 </div>
