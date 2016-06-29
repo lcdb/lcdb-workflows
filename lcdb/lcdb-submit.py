@@ -23,7 +23,7 @@ config = yaml.load(open(args.config))
 
 # extract the cluster info.
 
-cluster_config = {'__default__': config['cluster_default']}
+cluster_config = {'__default__': config.get('cluster_default', {'args': ""})}
 for rule, block in config.get('rules', {}).items():
     if 'cluster' in block:
         cluster_config[rule] = block['cluster']
