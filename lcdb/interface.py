@@ -67,17 +67,29 @@ class SampleHandler(object):
                 _samples.append(s)
         return _samples
 
-    def make_input(self, suffix, agg=False):
+    def make_input(self, suffix, lookup=False, agg=False):
         """ Generates Input Function based on wildcards """
         def _input(wildcards):
+            if lookup:
+                _suffix = wildcards[suffix]
+            else:
+                _suffix = suffix
+
             if agg:
                 level, _samples = self.find_level(wildcards['prefix'])
                 _sampleList = pd.DataFrame(_samples).to_dict('list')
-                return expand(self.config[self.levelMap[level]] + '{ext}', ext=suffix, **_sampleList)
+                return expand(self.config[self.levelMap[level]] + '{ext}', ext=_suffix, **_sampleList)
             else:
-                return expand('{prefix}{ext}', prefix=wildcards['prefix'], ext=suffix)
+                return expand('{prefix}{ext}', prefix=wildcards['prefix'], ext=_suffix)
+
         return _input
 
     def build_targets(self, patterns):
         """ Build target file names based on pattern namming scheme. """
-        return [t.format_map(self.config) for t in patterns]
+        _targets = []
+        for p in patterns:
+            p = p.format_map(self.config)
+            for s in self.samples:
+                e = dict(s, **self.config)
+                _targets.append(p.format_map(e))
+        return list(set(_targets))

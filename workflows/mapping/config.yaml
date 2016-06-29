@@ -3,6 +3,11 @@ sample_dir: pasilla
 assembly: dm6
 data_dir: /data/LCDB/references-test
 
+rawLevel: '{sample_dir}/{sampleID}/{sampleID}_R1'
+runLevel: '{sample_dir}/{sampleID}/{sampleID}_R1'
+sampleLevel: '{sample_dir}/{sampleID}/{sampleID}'
+aggLevel: '{sample_dir}/agg'
+
 shell_prefix: "source lcdb-workflows.bashrc; "
 
 rules:

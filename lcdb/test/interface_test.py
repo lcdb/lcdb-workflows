@@ -33,6 +33,7 @@ patterns = [
         '{runLevel}.fastq.gz',
         '{runLevel}.sort.bam',
         '{sampleLevel}.merged.sort.bam',
+        'otherfile.txt'
         ]
 
 
@@ -112,11 +113,29 @@ class TestSampleHandler(unittest.TestCase):
         _input = self.SH.make_input(suffix='.fastq', agg=True)
         self.assertEqual(_input(wildcards), [runInput + '.fastq'])
 
-    def test_build_targets(self):
+    def test_make_input_sample_agg_lookup(self):
+        wildcards = {
+                'prefix': self.config['sampleLevel'].format_map(self.SH.samples[0]),
+                'ext': '.sort.bam'
+                }
+        runInput = self.config['runLevel'].format_map(self.SH.samples[0])
+        _input = self.SH.make_input(suffix='ext', lookup=True, agg=True)
+        self.assertEqual(_input(wildcards), [runInput + '.sort.bam'])
 
+    def test_build_targets(self):
         targets = [
-                '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}_{replicate}_R1.fastq.gz',
-                '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}_{replicate}_R1.sort.bam',
-                '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}.merged.sort.bam',
+                '../../test/passilla_sample/treated1/treated1_treated_1_R1.fastq.gz',
+                '../../test/passilla_sample/treated2/treated2_treated_2_R1.fastq.gz',
+                '../../test/passilla_sample/untreated1/untreated1_untreated_1_R1.fastq.gz',
+                '../../test/passilla_sample/untreated2/untreated2_untreated_2_R1.fastq.gz',
+                '../../test/passilla_sample/treated1/treated1_treated_1_R1.sort.bam',
+                '../../test/passilla_sample/treated2/treated2_treated_2_R1.sort.bam',
+                '../../test/passilla_sample/untreated1/untreated1_untreated_1_R1.sort.bam',
+                '../../test/passilla_sample/untreated2/untreated2_untreated_2_R1.sort.bam',
+                '../../test/passilla_sample/treated1/treated1_treated.merged.sort.bam',
+                '../../test/passilla_sample/treated2/treated2_treated.merged.sort.bam',
+                '../../test/passilla_sample/untreated1/untreated1_untreated.merged.sort.bam',
+                '../../test/passilla_sample/untreated2/untreated2_untreated.merged.sort.bam',
+                'otherfile.txt'
                 ]
-        self.assertEqual(self.SH.build_targets(patterns), targets)
+        self.assertEqual(set(self.SH.build_targets(patterns)), set(targets))

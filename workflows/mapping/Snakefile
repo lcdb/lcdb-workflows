@@ -22,6 +22,9 @@ sys.path.insert(0, os.path.join(HERE, '../../lcdb'))
 import helpers
 wrapper_for, params_for, threads_for = helpers.workflow_helper_functions(config, HERE, WRAPPERS)
 
+from interface import SampleHandler
+
+ruleorder: align > merge_bam
 
 def fastq_screen_config_inputs():
     """
@@ -38,75 +41,55 @@ def fastq_screen_config_inputs():
         inputs.extend(expand(prefix + '.{n}.bt2', n=[1, 2, 3, 4]))
     return inputs
 
-
-sampletable = helpers.load_sampletable(config['sampletable'])
-samples = sampletable.index.tolist()
-
 include: '../references/references.snakefile'
-
 
 # ----------------------------------------------------------------------------
 # Aligner configuration.
 #
-ALIGNER_FASTQ_PATTERN = '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz'
-ALIGNER_BAM_OUTPUT_PATTERN = '{{sample_dir}}/{{sample}}/{{sample}}.cutadapt.{0}.bam'
-ALIGNER_LOG_OUTPUT_PATTERN = '{{sample_dir}}/{{sample}}/{{sample}}.cutadapt.{0}.bam.log'
 ALIGNER = config['rules']['align']['aligner']
 ALIGNER_PREFIX = config['rules']['align']['prefix']
 ALIGNER_TAG= {'bowtie2': 'bt2',  'hisat2': 'ht2'}[ALIGNER]
 
 if ALIGNER == 'hisat2':
     ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
-                           data_dir=config['data_dir'], prefix=ALIGNER_PREFIX,
+                           prefix=ALIGNER_PREFIX,
                            n=range(1, 9),
-                           tag=ALIGNER_TAG)
+                           tag=ALIGNER_TAG,
+                           data_dir = config['data_dir'])
 
 if ALIGNER == 'bowtie2':
     ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
-                           data_dir=config['data_dir'], prefix=ALIGNER_PREFIX,
+                           prefix=ALIGNER_PREFIX,
                            n=range(1, 5),
-                           tag=ALIGNER_TAG)
+                           tag=ALIGNER_TAG,
+                           data_dir = config['data_dir'])
 
 # ----------------------------------------------------------------------------
 # Generate final targets
 #
 patterns = [
-    '{sample_dir}/{sample}/{sample}_R1.fastqc.html',
-    '{sample_dir}/{sample}/{sample}_R1.fastq_screen.txt',
-    '{sample_dir}/{sample}/{sample}_R1.fastq_screen.png',
-    '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastqc.html',
-    '{sample_dir}/{sample}/{sample}_R1.cutadapt.fastq.gz',
-    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.bam',
-    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.observed_complexity',
-    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_complexity',
-    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage',
-    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
-    '{sample_dir}/{sample}/{sample}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics',
+    '{runLevel}.fastqc.html',
+    '{runLevel}.fastq_screen.txt',
+    '{runLevel}.fastq_screen.png',
+    '{runLevel}.cutadapt.fastqc.html',
+    '{runLevel}.cutadapt.fastq.gz',
+    '{runLevel}.cutadapt.{aligner_tag}.bam',
+    '{runLevel}.cutadapt.{aligner_tag}.unique.bam.observed_complexity',
+    '{runLevel}.cutadapt.{aligner_tag}.unique.bam.estimated_complexity',
+    '{runLevel}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage',
+    '{runLevel}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
+    '{runLevel}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics',
+    '{sampleLevel}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam',
     'multiqc_report.html',
     'fastq_screen_config.txt',
-    fastq_screen_config_inputs(),
-    ALIGNER_INDEX,
-]
-supplied = {
-    'sample': samples,
-    'sample_dir': config['sample_dir'],
-    'aligner_tag': ALIGNER_TAG,
-}
-
-# Fill in each pattern with each item in "supplied", resulting in a list of
-# lists. Collapse that into a list of strings, and then unique them into a set
-# since e.g. expand('a', samples=[1, 2, 3, 4]) results in ['a', 'a', 'a', 'a']
-targets = list(
-    set(
-        itertools.chain(
-            *map(lambda x: expand(x, **supplied), patterns)
-        )
-    )
-)
+] + fastq_screen_config_inputs() + ALIGNER_INDEX
 # ----------------------------------------------------------------------------
 
 
+config['aligner_tag'] = ALIGNER_TAG
+SH = SampleHandler(config)
 
+targets = SH.build_targets(patterns)
 rule all:
     input: targets
 
@@ -135,13 +118,12 @@ rule cutadapt:
     wrapper:
         wrapper_for('cutadapt')
 
-
 rule align:
     input:
-        fastq=ALIGNER_FASTQ_PATTERN,
+        fastq='{prefix}.fastq.gz',
         index=ALIGNER_INDEX
-    output: ALIGNER_BAM_OUTPUT_PATTERN.format(ALIGNER_TAG)
-    log: ALIGNER_LOG_OUTPUT_PATTERN.format(ALIGNER_TAG)
+    output: '{prefix}.{tag}.bam'
+    log: '{prefix}.{tag}.bam.log'
     params: extra=params_for('align', 'extra')
     threads: threads_for('align')
     wrapper:
@@ -255,4 +237,9 @@ rule picard_MarkDuplicates:
     wrapper:
         wrapper_for('picard/MarkDuplicates')
 
+rule merge_bam:
+    input: SH.make_input(suffix='.unique.sort.dedup.bam', agg=True)
+    output: '{prefix}.merged.unique.sort.dedup.bam'
+    wrapper:
+        wrapper_for('samtools/merge')
 # vim: ft=python
