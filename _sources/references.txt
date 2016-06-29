@@ -1,0 +1,7 @@
+References
+==========
+.. image:: images/references_dag.png
+    :width: 400px
+
+.. image:: images/references_full_dag.png
+    :width: 400px

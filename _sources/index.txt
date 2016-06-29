@@ -21,6 +21,7 @@ Contents:
    testing
    config
    mapping
+   references
 
 
 
