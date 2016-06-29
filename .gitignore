@@ -13,3 +13,6 @@ test/.Rsubread*
 /workflows/qc/fastq_screen_config.txt
 docs/build
 docs/source/images/*_dag.png
+/docs/source/config.yaml
+/workflows/mapping/fastq_screen_config.txt
+/workflows/mapping/Snakefile.log
