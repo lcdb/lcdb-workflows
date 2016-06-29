@@ -52,6 +52,10 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
+# The config to use for building dags
+CONFIG = ../workflows/mapping/config.yaml
+source/config.yaml: $(CONFIG)
+	cp $(CONFIG) $@
 
 .PHONY: html
 html:
