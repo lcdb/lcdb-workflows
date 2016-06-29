@@ -12,3 +12,4 @@ slurm-*out
 test/.Rsubread*
 /workflows/qc/fastq_screen_config.txt
 docs/build
+docs/source/images/*_dag.png
