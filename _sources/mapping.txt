@@ -1,8 +1,13 @@
 Mapping workflow
 ================
 
-.. image:: images/mapping_dag.png
+.. figure:: images/mapping_dag.png
     :width: 400px
 
-.. image:: images/mapping_full_dag.png
+    Rulegraph for mapping workflow
+
+.. figure:: images/mapping_full_dag.png
     :width: 400px
+
+    Full DAG of jobs to run for mapping workflow
+
