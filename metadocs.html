@@ -49,7 +49,8 @@
 <p>Specifically, this script:</p>
 <blockquote>
 <div><ul class="simple">
-<li>build the sphinx documentation in its current state in the current directory</li>
+<li>build the sphinx documentation in its current state in the current
+directory using <code class="docutils literal"><span class="pre">(cd</span> <span class="pre">docs</span> <span class="pre">&amp;&amp;</span> <span class="pre">make</span> <span class="pre">html)</span></code></li>
 <li>clone the repo from github into a temp dir</li>
 <li>checkout the <a class="reference external" href="https://help.github.com/articles/creating-project-pages-manually/">gh-pages</a>
 branch</li>
@@ -57,6 +58,17 @@ branch</li>
 <li>add everything that was copied</li>
 <li>make a git commit (referring to the current commit of the entire repo)</li>
 <li>push the changes to github</li>
+</ul>
+</div></blockquote>
+<p>There are some custom additions to the standard sphinx Makefile as dependencies
+of the <code class="docutils literal"><span class="pre">html</span></code> rule, s</p>
+<blockquote>
+<div><ul class="simple">
+<li>the testing config file is copied over to the docs dir if it doens&#8217;t
+exist or has been updated</li>
+<li>if any of the workflows&#8217; Snakefiles have been updated, a rulegraph and
+full dag is built for that workflow and the corresponding images are
+saved in the docs/source/images dir</li>
 </ul>
 </div></blockquote>
 </div>
