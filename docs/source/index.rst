@@ -17,6 +17,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   setup
+   testing
+   config
+
 
 
 Indices and tables
