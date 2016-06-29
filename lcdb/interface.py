@@ -16,7 +16,7 @@ class SampleHandler(object):
         self._compile_regex()
 
         # Order Dict
-        self.order = {
+        self.levelMap = {
             'runLevel': 'rawLevel',
             'sampleLevel': 'runLevel',
             'aggLevel': 'sampleLevel'
@@ -41,7 +41,7 @@ class SampleHandler(object):
         dictionaries.
 
         """
-        self.sampleTable = pd.read_table(self.config['sampletable'], sep='\t')
+        self.sampleTable = pd.read_table(self.config['sampletable'], sep='\t', dtype=str)
         self.sampleTable.set_index('sampleID', inplace=True)
         self.samples = self.sampleTable.reset_index().to_dict('records')
 
@@ -60,15 +60,24 @@ class SampleHandler(object):
 
     def find_sample(self, pattern, prefix):
         """ Find which sample(s) to use """
-        m = re.match(pattern, prefix)
-        return m.groupdict()
+        m = re.match(pattern, prefix).groupdict()
+        _samples = []
+        for s in self.samples:
+            if m.items() <= s.items():
+                _samples.append(s)
+        return _samples
 
     def make_input(self, suffix, agg=False):
         """ Generates Input Function based on wildcards """
         def _input(wildcards):
             if agg:
                 level, _samples = self.find_level(wildcards['prefix'])
-                return expand('{prefix}{ext}', prefix=wildcards['prefix'], ext=suffix)
+                _sampleList = pd.DataFrame(_samples).to_dict('list')
+                return expand(self.config[self.levelMap[level]] + '{ext}', ext=suffix, **_sampleList)
             else:
                 return expand('{prefix}{ext}', prefix=wildcards['prefix'], ext=suffix)
         return _input
+
+    def build_targets(self, patterns):
+        """ Build target file names based on pattern namming scheme. """
+        return [t.format_map(self.config) for t in patterns]

@@ -29,6 +29,12 @@ samples = [
     {'sampleID': 'untreated2', 'replicate': '2', 'treatment': 'untreated'} 
 ]
 
+patterns = [
+        '{runLevel}.fastq.gz',
+        '{runLevel}.sort.bam',
+        '{sampleLevel}.merged.sort.bam',
+        ]
+
 
 class TestSampleHandler(unittest.TestCase):
     def setUp(self):
@@ -64,15 +70,53 @@ class TestSampleHandler(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.SH.find_level(prefix)
 
-    def test_find_sample(self):
+    def test_find_sample_raw(self):
         prefix = self.config['rawLevel'].format_map(samples[0])
         _samples = self.SH.find_sample(self.SH.raw, prefix)
-        print(_samples)
-        print(samples[0])
-        self.assertDictEqual(_samples, samples[0])
+        self.assertEqual(_samples[0], samples[0])
 
-    def test_make_input(self):
-        wildcards = {'prefix': self.config['runLevel'].format_map(self.SH.samples[0])}
-        _input = self.SH.make_input(suffix='.fastq', agg=True)
+    def test_find_sample_run(self):
+        prefix = self.config['runLevel'].format_map(samples[0])
+        _samples = self.SH.find_sample(self.SH.run, prefix)
+        self.assertEqual(_samples[0], samples[0])
+
+    def test_find_sample_sample(self):
+        prefix = self.config['sampleLevel'].format_map(samples[0])
+        _samples = self.SH.find_sample(self.SH.sample, prefix)
+        self.assertEqual(_samples[0], samples[0])
+
+    def test_make_input_raw(self):
+        wildcards = {'prefix': self.config['rawLevel'].format_map(self.SH.samples[0])}
+        _input = self.SH.make_input(suffix='.fastq', agg=False)
         self.assertEqual(_input(wildcards), [wildcards['prefix'] + '.fastq'])
 
+    def test_make_input_run(self):
+        wildcards = {'prefix': self.config['runLevel'].format_map(self.SH.samples[0])}
+        _input = self.SH.make_input(suffix='.fastq', agg=False)
+        self.assertEqual(_input(wildcards), [wildcards['prefix'] + '.fastq'])
+
+    def test_make_input_sample(self):
+        wildcards = {'prefix': self.config['sampleLevel'].format_map(self.SH.samples[0])}
+        _input = self.SH.make_input(suffix='.fastq', agg=False)
+        self.assertEqual(_input(wildcards), [wildcards['prefix'] + '.fastq'])
+
+    def test_make_input_run_agg(self):
+        wildcards = {'prefix': self.config['runLevel'].format_map(self.SH.samples[0])}
+        rawInput = self.config['rawLevel'].format_map(self.SH.samples[0])
+        _input = self.SH.make_input(suffix='.fastq', agg=True)
+        self.assertEqual(_input(wildcards), [rawInput + '.fastq'])
+
+    def test_make_input_sample_agg(self):
+        wildcards = {'prefix': self.config['sampleLevel'].format_map(self.SH.samples[0])}
+        runInput = self.config['runLevel'].format_map(self.SH.samples[0])
+        _input = self.SH.make_input(suffix='.fastq', agg=True)
+        self.assertEqual(_input(wildcards), [runInput + '.fastq'])
+
+    def test_build_targets(self):
+
+        targets = [
+                '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}_{replicate}_R1.fastq.gz',
+                '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}_{replicate}_R1.sort.bam',
+                '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}.merged.sort.bam',
+                ]
+        self.assertEqual(self.SH.build_targets(patterns), targets)
