@@ -22,6 +22,7 @@ Contents:
    config
    mapping
    references
+   metadocs
 
 
 
