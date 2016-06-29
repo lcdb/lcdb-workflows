@@ -23,11 +23,11 @@ class SampleHandler(object):
         }
 
     def _compile(self, level):
-        """ Use snakemake regext to compile regex from format string.
+        """ Use snakemake regex to compile regex from format string.
 
         Snakemake provides a nice regex function that converts format strings
-        to regex. To help I also add sampleTable values to the regext to limit
-        the results. 
+        to regex. To help I also add sampleTable values to the regex to limit
+        the results.
 
         Parameters
         ----------
@@ -45,15 +45,15 @@ class SampleHandler(object):
             # Subsitute the first instance of each sampleTable column name and
             # add the unique list of column values. This will help narrow down
             # regex. NOTE: This may not be needed, but thought it might be useful.
-            pattern = re.sub('{{{name}}}'.format(name=name), 
-                             '{' + '{name}, {res}'.format(name=name, res='|'.join(set(values))) + '}', 
+            pattern = re.sub('{{{name}}}'.format(name=name),
+                             '{' + '{name}, {res}'.format(name=name, res='|'.join(set(values))) + '}',
                              pattern, count=1)
         # Retrun regex removing the '$' off of the end to allow partial matches
         return regex(pattern)[:-1]
 
     def _compile_regex(self):
-        """ Compile regex for each level 
-        
+        """ Compile regex for each level
+
         Attributes
         ----------
         raw: str
@@ -64,7 +64,7 @@ class SampleHandler(object):
             compiled regex for sample
         agg: str
             compiled regex for agg
-        
+
         """
         self.raw = self._compile('rawLevel')
         self.run = self._compile('runLevel')
@@ -72,7 +72,7 @@ class SampleHandler(object):
         self.agg = self._compile('aggLevel')
 
     def _load_sample_table(self):
-        """ Import the sample table and make a dictionary version too. 
+        """ Import the sample table and make a dictionary version too.
 
         This function imports the sample table and saves its information in two
         formats. The first is a pandas.DataFrame and the second is a list of
@@ -89,9 +89,9 @@ class SampleHandler(object):
         self.samples = self.sampleTable.reset_index().to_dict('records')
 
     def find_level(self, prefix):
-        """ Figure out which regex the prefix matches. 
+        """ Figure out which regex the prefix matches.
 
-        Scanns each level and tries to identify which level the prefix matches.
+        Scans each level and tries to identify which level the prefix matches.
 
         Parameters
         ----------
@@ -104,7 +104,7 @@ class SampleHandler(object):
         tuple:
             [0] is a string indicating which level
             [1] is a dict with sample information
-        
+
         Raises
         ------
         ValueError
@@ -120,11 +120,11 @@ class SampleHandler(object):
         elif re.match(self.agg, prefix):
             return 'aggLevel', self.find_sample(self.agg, prefix)
         else:
-            raise ValueError
+            raise ValueError("Can't find a match for %s" % prefix)
 
     def find_sample(self, pattern, prefix):
         """ Find which sample(s) to use.
-        
+
         Parameters
         ----------
         pattern: str
@@ -148,37 +148,39 @@ class SampleHandler(object):
         return _samples
 
     def make_input(self, prefix='prefix', midfix='', suffix='', agg=False):
-        """ Generates Input Function based on wildcards. 
+        """ Generates Input Function based on wildcards.
 
         Notes
         -----
 
         example: '{first_element}{second_element}{third_element}'
-        
+
         Parameters
         ----------
         prefix: str
             This can either be the entire prefix, or the name of the string
-            formating group that contains the prefix. This would be the
+            formatting group that contains the prefix. This would be the
             'first_element' in the example.
 
         midfix: str
             This can either be the entire midfix, or the name of the string
             formating group that contains the midfix. This would be the
             'second_element' in the example.
+
         suffix: str
             This can either be the entire suffix, or the name of the string
             formating group that contains the suffix. This would be the
             'third_element' in the example.
+
         agg: bool
-            True is you want file names from the level above the current
-            prefxi.
+            True if you want file names from the level above the current
+            prefix.
 
         Returns
         -------
         function:
             Retruns a snakemake input function that generates a list of files.
-        
+
         """
         def _input(wildcards):
 
@@ -212,9 +214,9 @@ class SampleHandler(object):
         return _input
 
     def build_targets(self, patterns):
-        """ Build target file names based on pattern namming scheme. 
+        """ Build target file names based on pattern naming scheme.
 
-        Given a list of string formmated patterns will use config information
+        Given a list of string formatted patterns will use config information
         to fill in the patterns and generate a list of file targets.
 
         Parameters
@@ -227,7 +229,7 @@ class SampleHandler(object):
         -------
         list:
             Filled in list of file names.
-        
+
         """
         _targets = []
         for p in patterns:
