@@ -42,6 +42,124 @@
             
   <div class="section" id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<p>The following is the example configuration file used for running tests:</p>
+<div class="code yaml highlight-default"><div class="highlight"><pre><span></span><span class="n">sampletable</span><span class="p">:</span> <span class="n">pasilla_sampletable</span><span class="o">.</span><span class="n">tsv</span>
+<span class="n">sample_dir</span><span class="p">:</span> <span class="n">pasilla</span>
+<span class="n">assembly</span><span class="p">:</span> <span class="n">dm6</span>
+<span class="n">data_dir</span><span class="p">:</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">LCDB</span><span class="o">/</span><span class="n">references</span><span class="o">-</span><span class="n">test</span>
+
+<span class="n">shell_prefix</span><span class="p">:</span> <span class="s2">&quot;source lcdb-workflows.bashrc; &quot;</span>
+<span class="n">cluster_default</span><span class="p">:</span>
+  <span class="n">args</span><span class="p">:</span> <span class="s2">&quot;--time=04:00:00&quot;</span>
+
+<span class="n">rules</span><span class="p">:</span>
+  <span class="n">cutadapt</span><span class="p">:</span>
+    <span class="n">params</span><span class="p">:</span>
+      <span class="n">extra</span><span class="p">:</span> <span class="s1">&#39;-a file:adapters.fa --quality-cutoff 20 --minimum-length 25 --overlap 10&#39;</span>
+
+  <span class="n">align</span><span class="p">:</span>
+    <span class="n">aligner</span><span class="p">:</span> <span class="n">hisat2</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="n">dm6</span><span class="o">/</span><span class="n">hisat2</span><span class="o">/</span><span class="n">dm6_default</span>
+    <span class="n">params</span><span class="p">:</span>
+      <span class="n">extra</span><span class="p">:</span> <span class="s1">&#39;--max-intronlen=5000&#39;</span>
+    <span class="n">threads</span><span class="p">:</span> <span class="mi">8</span>
+    <span class="n">cluster</span><span class="p">:</span>
+      <span class="n">args</span><span class="p">:</span> <span class="s2">&quot;--mem=32g&quot;</span>
+
+  <span class="n">fastqc</span><span class="p">:</span>
+    <span class="n">params</span><span class="p">:</span>
+      <span class="n">extra</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+
+  <span class="n">fastq_screen</span><span class="p">:</span>
+    <span class="n">indexes</span><span class="p">:</span>
+      <span class="n">ecoli</span><span class="p">:</span> <span class="n">ecoli</span><span class="o">/</span><span class="n">bowtie2</span><span class="o">/</span><span class="n">ecoli_default</span>
+      <span class="n">wolbachia</span><span class="p">:</span> <span class="n">wolbachia</span><span class="o">/</span><span class="n">bowtie2</span><span class="o">/</span><span class="n">wolbachia_default</span>
+      <span class="n">dm6</span><span class="p">:</span> <span class="n">dm6</span><span class="o">/</span><span class="n">bowtie2</span><span class="o">/</span><span class="n">dm6_default</span>
+      <span class="n">sacCer3</span><span class="p">:</span> <span class="n">sacCer3</span><span class="o">/</span><span class="n">bowtie2</span><span class="o">/</span><span class="n">sacCer3_default</span>
+    <span class="n">aligner</span><span class="p">:</span> <span class="n">bowtie2</span>
+    <span class="n">cluster</span><span class="p">:</span>
+      <span class="n">args</span><span class="p">:</span> <span class="s2">&quot;--mem=32g&quot;</span>
+
+
+  <span class="n">samtools_unique</span><span class="p">:</span>
+    <span class="n">params</span><span class="p">:</span>
+      <span class="n">extra</span><span class="p">:</span> <span class="s1">&#39;-q 20 -b&#39;</span>
+
+  <span class="n">picard_MarkDuplicates</span><span class="p">:</span>
+    <span class="n">params</span><span class="p">:</span>
+      <span class="n">extra</span><span class="p">:</span> <span class="s2">&quot;REMOVE_DUPLICATES=true VALIDATION_STRINGENCY=SILENT&quot;</span>
+    <span class="n">cluster</span><span class="p">:</span>
+      <span class="n">args</span><span class="p">:</span> <span class="s2">&quot;--mem=32g&quot;</span>
+
+<span class="n">references</span><span class="p">:</span>
+
+  <span class="o">-</span>
+    <span class="n">assembly</span><span class="p">:</span> <span class="s1">&#39;sacCer3&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;fasta&#39;</span>
+    <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;http://hgdownload.cse.ucsc.edu/goldenPath/sacCer3/bigZips/chromFa.tar.gz&#39;</span>
+    <span class="n">postprocess</span><span class="p">:</span> <span class="s1">&#39;sacCer3.fasta_postprocess&#39;</span>
+    <span class="n">indexes</span><span class="p">:</span>
+        <span class="o">-</span> <span class="s1">&#39;bowtie2&#39;</span>
+
+  <span class="o">-</span>
+    <span class="n">assembly</span><span class="p">:</span> <span class="s1">&#39;dm6&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;gtf&#39;</span>
+    <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/gtf/dmel-all-r6.11.gtf.gz&#39;</span>
+    <span class="n">postprocess</span><span class="p">:</span> <span class="s2">&quot;dm6.gtf_postprocess&quot;</span>
+    <span class="n">tag</span><span class="p">:</span> <span class="s1">&#39;r6-11&#39;</span>
+    <span class="n">conversions</span><span class="p">:</span>
+      <span class="o">-</span> <span class="s1">&#39;intergenic&#39;</span>
+  <span class="o">-</span>
+    <span class="n">assembly</span><span class="p">:</span> <span class="s1">&#39;dm6&#39;</span>
+    <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-chromosome-r6.11.fasta.gz&#39;</span>
+    <span class="n">postprocess</span><span class="p">:</span> <span class="s2">&quot;dm6.fasta_postprocess&quot;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;fasta&#39;</span>
+    <span class="n">indexes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="s1">&#39;bowtie2&#39;</span>
+      <span class="o">-</span> <span class="s1">&#39;hisat2&#39;</span>
+  <span class="o">-</span>
+    <span class="n">assembly</span><span class="p">:</span> <span class="s1">&#39;dm6&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;fasta&#39;</span>
+    <span class="n">tag</span><span class="p">:</span> <span class="s1">&#39;r6-11_transcriptome&#39;</span>
+    <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-transcript-r6.11.fasta.gz&#39;</span>
+    <span class="n">indexes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="s1">&#39;kallisto&#39;</span>
+  <span class="o">-</span>
+    <span class="n">assembly</span><span class="p">:</span> <span class="s1">&#39;hg19&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;fasta&#39;</span>
+    <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/GRCh37.p13.genome.fa.gz&#39;</span>
+    <span class="n">indexes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="s1">&#39;bowtie2&#39;</span>
+      <span class="o">-</span> <span class="s1">&#39;hisat2&#39;</span>
+  <span class="o">-</span>
+    <span class="n">assembly</span><span class="p">:</span> <span class="s1">&#39;hg19&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;gtf&#39;</span>
+    <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz&#39;</span>
+    <span class="n">tag</span><span class="p">:</span> <span class="s1">&#39;gencode-v19&#39;</span>
+  <span class="o">-</span>
+    <span class="n">assembly</span><span class="p">:</span> <span class="s1">&#39;hg19&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;fasta&#39;</span>
+    <span class="n">tag</span><span class="p">:</span> <span class="s1">&#39;gencode_v19_plus_lncRNA_transcriptome&#39;</span>
+    <span class="n">url</span><span class="p">:</span>
+      <span class="o">-</span> <span class="s1">&#39;ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/gencode.v19.pc_transcripts.fa.gz&#39;</span>
+      <span class="o">-</span> <span class="s1">&#39;ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_19/gencode.v19.lncRNA_transcripts.fa.gz&#39;</span>
+    <span class="n">postprocess</span><span class="p">:</span> <span class="s2">&quot;hg19.plus_lncrna_fasta_postprocess&quot;</span>
+    <span class="n">indexes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="s1">&#39;kallisto&#39;</span>
+  <span class="o">-</span>
+    <span class="n">assembly</span><span class="p">:</span> <span class="s1">&#39;ecoli&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;fasta&#39;</span>
+    <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.fna.gz&#39;</span>
+    <span class="n">indexes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="s1">&#39;bowtie2&#39;</span>
+  <span class="o">-</span>
+    <span class="n">assembly</span><span class="p">:</span> <span class="s1">&#39;wolbachia&#39;</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;fasta&#39;</span>
+    <span class="n">url</span><span class="p">:</span> <span class="s1">&#39;ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF_000008025.1_ASM802v1/GCF_000008025.1_ASM802v1_genomic.fna.gz&#39;</span>
+    <span class="n">indexes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="s1">&#39;bowtie2&#39;</span>
+</pre></div>
+</div>
 </div>
 
 

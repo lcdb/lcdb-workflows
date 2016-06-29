@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Building documentation &mdash; lcdb-workflows 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="lcdb-workflows 0.1 documentation" href="index.html" />
+    <link rel="prev" title="References" href="references.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="building-documentation">
+<h1>Building documentation<a class="headerlink" href="#building-documentation" title="Permalink to this headline">¶</a></h1>
+<p>From the top-level dir of the repo:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">bash</span> <span class="n">docs</span><span class="o">/</span><span class="n">build</span><span class="o">-</span><span class="n">docs</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>Then check <a class="reference external" href="http://lcdb.github.io/lcdb-workflows">http://lcdb.github.io/lcdb-workflows</a> to see the updates.</p>
+<p>Specifically, this script:</p>
+<blockquote>
+<div><ul class="simple">
+<li>build the sphinx documentation in its current state in the current directory</li>
+<li>clone the repo from github into a temp dir</li>
+<li>checkout the <a class="reference external" href="https://help.github.com/articles/creating-project-pages-manually/">gh-pages</a>
+branch</li>
+<li>copy the built documentation over to the temp repo&#8217;s <code class="docutils literal"><span class="pre">gh-pages</span></code> branch</li>
+<li>add everything that was copied</li>
+<li>make a git commit (referring to the current commit of the entire repo)</li>
+<li>push the changes to github</li>
+</ul>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="references.html" title="previous chapter">References</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/metadocs.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Ryan Dale, Justin Fear, Behram Radmanesh, Bertram Canagarajah.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/metadocs.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
