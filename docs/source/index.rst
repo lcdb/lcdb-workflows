@@ -20,6 +20,8 @@ Contents:
    setup
    testing
    config
+   mapping
+   references
 
 
 
