@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LCDB workflows &mdash; lcdb-workflows 0.1 documentation</title>
+    <title>First-time setup &mdash; lcdb-workflows 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,8 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="lcdb-workflows 0.1 documentation" href="#" />
-    <link rel="next" title="First-time setup" href="setup.html" />
+    <link rel="top" title="lcdb-workflows 0.1 documentation" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -39,28 +38,29 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="lcdb-workflows">
-<h1>LCDB workflows<a class="headerlink" href="#lcdb-workflows" title="Permalink to this headline">¶</a></h1>
-<p><strong>LCDB workflows</strong> is a collection of <a class="reference external" href="https://bitbucket.org/snakemake/snakemake/wiki/Home">snakemake</a> workflows combined with
-supporting infrastructure to support best-practices, reproducible, highly
-parallel processing of high-throughput sequencing data on a high-performance
-computing cluster.</p>
-<p>Contents:</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="setup.html">First-time setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="setup.html#subsequent-setup">Subsequent setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
-</ul>
+  <div class="section" id="first-time-setup">
+<h1>First-time setup<a class="headerlink" href="#first-time-setup" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic">
+<li><p class="first">Install <cite>conda</cite></p>
+<p><cite>lcdb-workflows</cite> depends heavily on the <cite>conda</cite> package manager to ensure
+reproducible environments. If you don&#8217;t already have <cite>conda</cite>, install
+<a class="reference external" href="http://conda.pydata.org/miniconda.html">miniconda</a> (Python 3 version
+recommended).</p>
+</li>
+<li><p class="first">Clone the repository:</p>
+<p>git clone <a class="reference external" href="https://github.com/lcdb/lcdb-workflows.git">https://github.com/lcdb/lcdb-workflows.git</a></p>
+</li>
+<li><p class="first">Run the tests. Set <cite>&#8211;threads</cite> to as many cores as you have on your machine.
+With 8 cores, this takes about 6 min:</p>
+<p>test/run_test.py workflows/mapping/Snakefile &#8211;clean &#8211;build-env &#8211;threads 8</p>
+</li>
+</ol>
+<p>The output will be in <cite>workflows/mapping/pasilla</cite>.</p>
 </div>
-</div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
-</ul>
+<div class="section" id="subsequent-setup">
+<h1>Subsequent setup<a class="headerlink" href="#subsequent-setup" title="Permalink to this headline">¶</a></h1>
+<p>The <cite>lcdb/lcdb-init.py</cite> script can be used to initialize a working repo in
+a new working directory.</p>
 </div>
 
 
@@ -69,23 +69,22 @@ computing cluster.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">LCDB workflows</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#">First-time setup</a></li>
+<li><a class="reference internal" href="#subsequent-setup">Subsequent setup</a></li>
 </ul>
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
-  <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="setup.html" title="next chapter">First-time setup</a></li>
+  <li><a href="index.html">Documentation overview</a><ul>
   </ul></li>
 </ul>
 </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/index.txt"
+      <li><a href="_sources/setup.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -111,7 +110,7 @@ computing cluster.</p>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
       
       |
-      <a href="_sources/index.txt"
+      <a href="_sources/setup.txt"
           rel="nofollow">Page source</a>
     </div>
 

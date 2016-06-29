@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Testing &mdash; lcdb-workflows 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="lcdb-workflows 0.1 documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="testing">
+<h1>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h1>
+<p>The interface for testing is through the <cite>test/run_test.py</cite> script. Its
+built-in help should give you all you need to know:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">test</span><span class="o">/</span><span class="n">run_test</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">h</span>
+</pre></div>
+</div>
+<p>Here are some common use-cases. These examples use the &#8220;mapping&#8221; workflow.</p>
+<p><strong>Minimal test:</strong> Assumes environment <cite>lcdb-workflows-$USER-env</cite> exists and data
+have been downloaded. If you&#8217;re on an interactive node, all your allocated
+cores will be used. This is the version you&#8217;ll probably use the most when
+devleoping a new wrapper or rule or workflow.</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">test</span><span class="o">/</span><span class="n">run_test</span><span class="o">.</span><span class="n">py</span> <span class="n">workflows</span><span class="o">/</span><span class="n">mapping</span><span class="o">/</span><span class="n">Snakefile</span>
+</pre></div>
+</div>
+<p><strong>Only rebuild environment:</strong> Made some changes to requirements.txt and want to
+refresh your env? Build a new one without running the test:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">test</span><span class="o">/</span><span class="n">run_test</span><span class="o">.</span><span class="n">py</span> <span class="n">workflows</span><span class="o">/</span><span class="n">mapping</span><span class="o">/</span><span class="n">Snakefile</span> <span class="o">--</span><span class="n">build</span><span class="o">-</span><span class="n">env</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">test</span>
+</pre></div>
+</div>
+<p><strong>Build environment, clean output,  and run test:</strong> A more complete test, this
+destroys an existing environment and builds it again. It then <strong>deletes the
+entire test data directory</strong> and re-downloads test data, then runs the test:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">test</span><span class="o">/</span><span class="n">run_test</span><span class="o">.</span><span class="n">py</span> <span class="n">workflows</span><span class="o">/</span><span class="n">mapping</span><span class="o">/</span><span class="n">Snakefile</span> <span class="o">--</span><span class="n">build</span><span class="o">-</span><span class="n">env</span> <span class="o">--</span><span class="n">clean</span>
+</pre></div>
+</div>
+<p><strong>Submit job to a single cluster node:</strong> This runs a complete test on a single cluster node.
+It builds a new environment before submitting to the cluster. Use the
+<cite>&#8211;threads</cite> and <cite>&#8211;mem</cite> args to configure the job. An email will be sent to you
+upon job completion or failure.</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">test</span><span class="o">/</span><span class="n">run_test</span><span class="o">.</span><span class="n">py</span> <span class="n">workflows</span><span class="o">/</span><span class="n">mapping</span><span class="o">/</span><span class="n">Snakefile</span> <span class="o">--</span><span class="n">sbatch</span> <span class="o">--</span><span class="n">build</span><span class="o">-</span><span class="n">env</span> <span class="o">--</span><span class="n">clean</span> <span class="o">--</span><span class="n">threads</span><span class="o">=</span><span class="mi">8</span> <span class="o">--</span><span class="n">mem</span><span class="o">=</span><span class="mi">32</span><span class="n">g</span>
+</pre></div>
+</div>
+<p><strong>Submit job in parallel to cluster:</strong> This is probably what you will be doing
+in &#8220;production&#8221; mode &#8211; running jobs in parallel, each submitted to a different
+node. Note that the config file contains per-rule thread and memory settings,
+so <cite>&#8211;threads</cite> and <cite>&#8211;mem</cite> are unused.</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">test</span><span class="o">/</span><span class="n">run_test</span><span class="o">.</span><span class="n">py</span> <span class="n">workflows</span><span class="o">/</span><span class="n">mapping</span><span class="o">/</span><span class="n">Snakefile</span><span class="o">--</span><span class="n">cluster</span> <span class="o">--</span><span class="n">clean</span> <span class="o">--</span><span class="n">build</span><span class="o">-</span><span class="n">env</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/testing.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Ryan Dale, Justin Fear, Behram Radmanesh, Bertram Canagarajah.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/testing.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
