@@ -113,8 +113,11 @@ rule all:
 
 rule clean:
     run:
-        shell('rm -r {config[sample_dir]}')
-        shell('bash get-data.sh')
+        if os.path.exists(config['sample_dir']):
+            shell('rm -r {config[sample_dir]}')
+        shell('wget -O - http://helix.nih.gov/~dalerr/lcdb-workflows-data/pasilla.tar > pasilla.tar')
+        shell('tar -xvf pasilla.tar')
+        shell('rm pasilla.tar')
 
 
 rule fastqc:
