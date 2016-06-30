@@ -1,6 +1,6 @@
 
 tests:
-	python -m unittest discover -s 'lcdb' -p "*_test.py"
+	source activate lcdb-workflows-$(USER)-env && python -m unittest discover -s 'lcdb' -p "*_test.py"
 
 workflowtest: $(workflow)
 	test/run_test.py . --build-env --clean --workflow=$(workflow)
