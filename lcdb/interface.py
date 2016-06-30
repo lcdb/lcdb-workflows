@@ -45,9 +45,11 @@ class SampleHandler(object):
             # Subsitute the first instance of each sampleTable column name and
             # add the unique list of column values. This will help narrow down
             # regex. NOTE: This may not be needed, but thought it might be useful.
-            pattern = re.sub('{{{name}}}'.format(name=name),
-                             '{' + '{name}, {res}'.format(name=name, res='|'.join(set(values))) + '}',
-                             pattern, count=1)
+            pattern = re.sub(
+                '{{{name}}}'.format(name=name),
+                '{' + '{name}, {res}'.format(
+                    name=name, res='|'.join(sorted(set(values)))
+                ) + '}', pattern, count=1)
         # Retrun regex removing the '$' off of the end to allow partial matches
         return regex(pattern)[:-1]
 
