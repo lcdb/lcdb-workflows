@@ -355,12 +355,15 @@ class SampleHandler(object):
 
 if __name__ == "__main__":
     import doctest
+    from textwrap import dedent
     from unittest import TestCase
 
     def assertRaises(*args, **kwargs):
         return TestCase.assertRaises(None, *args, **kwargs)
 
-    from textwrap import dedent
+    # so that paths in config files work correctly
+    os.chdir(os.path.dirname(__file__))
+
     test_sampletable = dedent("""\
     sampleID	treatment	replicate
     treated1	treated	1
@@ -368,8 +371,7 @@ if __name__ == "__main__":
     untreated1	untreated	1
     untreated2	untreated	2
     """)
-    sampletable = os.path.join(
-        os.path.dirname(__file__), 'test', 'test_sampletable.tsv')
+    sampletable = os.path.join('test', 'test_sampletable.tsv')
     with open(sampletable, 'w') as fout:
         fout.write(test_sampletable)
 
