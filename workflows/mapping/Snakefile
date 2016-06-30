@@ -42,7 +42,7 @@ def fastq_screen_config_inputs():
 sampletable = helpers.load_sampletable(config['sampletable'])
 samples = sampletable.index.tolist()
 
-include: '../references/references.snakefile'
+include: '../references/Snakefile'
 
 
 # ----------------------------------------------------------------------------
