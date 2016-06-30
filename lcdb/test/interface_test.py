@@ -22,11 +22,20 @@ aggLevel2:
     - '{treatment}'
 """
 
+test_sampletable = """\
+sampleID	treatment	replicate
+treated1	treated	1
+treated2	treated	2
+untreated1	untreated	1
+untreated2	untreated	2
+"""
+sampletable = os.path.join(os.path.dirname(__file__), 'test_sampletable.tsv')
+
 samples = [
-    {'sampleID': 'treated1', 'replicate': '1', 'treatment': 'treated'}, 
-    {'sampleID': 'treated2', 'replicate': '2', 'treatment': 'treated'}, 
-    {'sampleID': 'untreated1', 'replicate': '1', 'treatment': 'untreated'}, 
-    {'sampleID': 'untreated2', 'replicate': '2', 'treatment': 'untreated'} 
+    {'sampleID': 'treated1', 'replicate': '1', 'treatment': 'treated'},
+    {'sampleID': 'treated2', 'replicate': '2', 'treatment': 'treated'},
+    {'sampleID': 'untreated1', 'replicate': '1', 'treatment': 'untreated'},
+    {'sampleID': 'untreated2', 'replicate': '2', 'treatment': 'untreated'}
 ]
 
 patterns = [
@@ -41,6 +50,9 @@ class TestSampleHandler(unittest.TestCase):
     def setUp(self):
         from interface import SampleHandler
 
+        with open(sampletable, 'w') as fout:
+            fout.write(test_sampletable)
+
         # Load config
         self.config = yaml.load(configYaml)
 
@@ -48,7 +60,7 @@ class TestSampleHandler(unittest.TestCase):
         self.SH = SampleHandler(self.config)
 
     def tearDown(self):
-        pass
+        os.unlink('test_sampletable.tsv')
 
     def test_init(self):
         self.assertEqual(self.config, self.SH.config)
