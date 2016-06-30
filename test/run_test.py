@@ -6,28 +6,25 @@ import os
 import uuid
 import sys
 
-env_name = 'lcdb-workflows-%s-env' % os.environ['USER']
-
-
-class bcolors:
-    "Fancy terminal color output. Thanks http://stackoverflow.com/a/287944"
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
+HERE = os.path.realpath(os.path.dirname(__file__))
+ENV_NAME = 'lcdb-workflows-%s-env' % os.environ['USER']
+REQUIREMENTS = os.path.join(HERE, 'requirements.txt')
+BLUE = '\033[94m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+RED = '\033[91m'
+ENDC = '\033[0m'
 
 ap = argparse.ArgumentParser()
 
-ap.add_argument('repo', help='Path to lcdb-workflows directory to test')
+ap.add_argument(
+    'workflow',
+    default='test/Snakefile',
+    help='Which workflow to test (path to snakefile)')
 
 ap.add_argument(
     '--build-env', action='store_true',
-    help='Build environment "%s"' % env_name)
+    help='Build environment "%s"' % ENV_NAME)
 
 ap.add_argument(
     '--no-test', action='store_true',
@@ -36,7 +33,7 @@ ap.add_argument(
 
 ap.add_argument(
     '--clean', action='store_true',
-    help="Delete the test data directory and re-download data.")
+    help="Run the 'clean' rule of the snakefile before calling it a second time")
 
 ap.add_argument(
     '--sbatch', action='store_true',
@@ -49,7 +46,8 @@ ap.add_argument(
     --cpus-per-task; if $SLURM_CPUS_PER_TASK exists (that is, you're on an
     interactive node) use that; otherwise assume running on a node with this
     many cores.  Snakemake will be run with the -j argument set to this many
-    threads.''')
+    threads. If --cluster is specified, this has no effect (the cluster
+    submission command limits the number of jobs to 999)''')
 
 ap.add_argument(
     '--mem',
@@ -57,11 +55,23 @@ ap.add_argument(
     help='Memory to request. Only has an effect if --sbatch also specified.')
 
 ap.add_argument(
-    '--workflow',
-    default='test',
-    help='Which workflow to test')
+    '--cluster',
+    action='store_true',
+    help='Instead of submitting a single job to the cluster, build a submit '
+    'script and cluster config and submit that to the cluster')
+
+ap.add_argument(
+    '--config',
+    help='''Specify a default config file. The default is to use the
+    config.yaml file in the same directory as the specified workflow.''')
 
 args = ap.parse_args()
+
+if args.config:
+    CONFIG = args.config
+
+else:
+    CONFIG = os.path.join(os.path.dirname(args.workflow), 'config.yaml')
 
 # If no threads supplied and we're on an interactive node, use as many CPUs as
 # are allocated.
@@ -73,14 +83,6 @@ if args.threads is None:
 else:
     threads = args.threads
 
-
-REPO = os.path.abspath(args.repo)
-
-print(bcolors.OKBLUE + "Using repo: " + REPO + bcolors.ENDC)
-
-def requirements(repo):
-    "Path to requirements.txt in the repo"
-    return os.path.join(repo, 'test', 'requirements.txt')
 
 def env_exists(name):
     """
@@ -96,28 +98,31 @@ def env_exists(name):
         )
     )
 
-def create_env(name, repo):
+def create_env(name):
     """
     Remove environment if it exists and build a new one.
     """
     if env_exists(name):
         print(
-            bcolors.WARNING
+            YELLOW
             + 'conda env '
             + name + ' exists, removing and rebuilding based on '
-            + requirements(repo)
-            +  bcolors.ENDC)
+            + REQUIREMENTS
+            + ENDC)
         sp.check_call([
             'conda', 'remove', '-n', name, '--all'])
     sp.check_call([
-        'conda', 'create', '-n', name, '--file', requirements(repo), '-c', 'bioconda', '-c', 'r', 'python=3', '-y'])
+        'conda', 'create', '-n', name, '--file', REQUIREMENTS, '-c', 'bioconda', '-c', 'r', 'python=3', '-y'])
 
 
 if args.build_env:
-    create_env(env_name, REPO)
+    create_env(ENV_NAME)
+
+DIRECTORY = os.path.dirname(args.workflow)
+SNAKEMAKE = "snakemake --directory {DIRECTORY} -s {args.workflow}".format(**locals())
 
 if args.clean:
-    CLEAN = "snakemake clean --configfile config.yaml"
+    CLEAN = SNAKEMAKE + ' clean'
 else:
     CLEAN = ""
 
@@ -125,20 +130,15 @@ else:
 # command.
 script = """\
 #!/bin/bash
-
-set -e
-
-source activate {env_name}
-cd {repo}/{args.workflow}
-bash get-data.sh
+set -eo pipefail
+source activate {ENV_NAME}
 {CLEAN}
-snakemake --unlock --configfile config.yaml
-snakemake -j {threads} -pr --configfile config.yaml
+{SNAKEMAKE} -j {threads} -p -r -T --verbose --configfile {CONFIG}
 """
 script_name = 'lcdb-workflows-submit-%s.sh' % (str(uuid.uuid4()).split('-')[0])
 with open(script_name, 'w') as fout:
-    fout.write(script.format(args=args, env_name=env_name, repo=REPO, threads=threads, CLEAN=CLEAN))
-print(bcolors.OKBLUE + "Wrote " + script_name  + bcolors.ENDC)
+    fout.write(script.format(**locals()))
+print(BLUE + "Wrote " + script_name  + ENDC)
 
 if args.sbatch:
     cmd = [
@@ -150,6 +150,19 @@ if args.sbatch:
     sp.check_call(cmd)
     sys.exit(0)
 
-elif not args.no_test:
-    print(bcolors.OKBLUE + "Running " + script_name + bcolors.ENDC)
+elif args.cluster:
+    # run the separate submit script so that it can do the config parsing and
+    # cluster-config.yaml building work
+    cmd = [
+        'python', 'lcdb/lcdb-submit.py',
+        '--config', CONFIG,
+        '--workflow', args.workflow,
+        '--cluster-config', 'test-cluster-config.yaml',
+        '--output', script_name,
+        '--pre-block', CLEAN
+    ]
+    sp.check_call(cmd)
+
+if not args.no_test:
+    print(BLUE + "Running " + script_name + ENDC)
     sp.check_call(['bash', script_name])

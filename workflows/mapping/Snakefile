@@ -40,7 +40,11 @@ def fastq_screen_config_inputs():
         inputs.extend(expand(prefix + '.{n}.bt2', n=[1, 2, 3, 4]))
     return inputs
 
-include: '../references/references.snakefile'
+
+sampletable = helpers.load_sampletable(config['sampletable'])
+samples = sampletable.index.tolist()
+
+include: '../references/Snakefile'
 
 # ----------------------------------------------------------------------------
 # Aligner configuration.
@@ -95,8 +99,11 @@ rule all:
 
 rule clean:
     run:
-        shell('rm -r {config[sample_dir]}')
-        shell('bash get-data.sh')
+        if os.path.exists(config['sample_dir']):
+            shell('rm -r {config[sample_dir]}')
+        shell('wget -O - http://helix.nih.gov/~dalerr/lcdb-workflows-data/pasilla.tar > pasilla.tar')
+        shell('tar -xvf pasilla.tar')
+        shell('rm pasilla.tar')
 
 
 rule fastqc:

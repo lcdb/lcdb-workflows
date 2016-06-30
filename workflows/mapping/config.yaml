@@ -1,7 +1,7 @@
 sampletable: pasilla_sampletable.tsv
 sample_dir: pasilla
 assembly: dm6
-data_dir: /data/LCDB/references-test
+data_dir: references-test
 
 rawLevel: 'pasilla/{sampleID}/{sampleID}_R1'
 runLevel: 'pasilla/{sampleID}/{sampleID}_R1'
@@ -9,6 +9,8 @@ sampleLevel: 'pasilla/{sampleID}/{sampleID}'
 aggLevel: 'pasilla/agg/{treatment}'
 
 shell_prefix: "source lcdb-workflows.bashrc; "
+cluster_default:
+  args: "--time=04:00:00"
 
 rules:
   cutadapt:
@@ -21,18 +23,23 @@ rules:
     params:
       extra: '--max-intronlen=5000'
     threads: 8
+    cluster:
+      args: "--mem=32g"
 
   fastqc:
     params:
       extra: ""
 
   fastq_screen:
-      indexes:
-        ecoli: ecoli/bowtie2/ecoli_default
-        wolbachia: wolbachia/bowtie2/wolbachia_default
-        dm6: dm6/bowtie2/dm6_default
-        sacCer3: sacCer3/bowtie2/sacCer3_default
-      aligner: bowtie2
+    indexes:
+      ecoli: ecoli/bowtie2/ecoli_default
+      wolbachia: wolbachia/bowtie2/wolbachia_default
+      dm6: dm6/bowtie2/dm6_default
+      sacCer3: sacCer3/bowtie2/sacCer3_default
+    aligner: bowtie2
+    cluster:
+      args: "--mem=32g"
+
 
   samtools_unique:
     params:
@@ -41,6 +48,8 @@ rules:
   picard_MarkDuplicates:
     params:
       extra: "REMOVE_DUPLICATES=true VALIDATION_STRINGENCY=SILENT"
+    cluster:
+      args: "--mem=32g"
 
 references:
 
