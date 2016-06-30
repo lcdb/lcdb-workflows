@@ -3,6 +3,11 @@ sample_dir: pasilla
 assembly: dm6
 data_dir: references-test
 
+rawLevel: 'pasilla/{sampleID}/{sampleID}_R1'
+runLevel: 'pasilla/{sampleID}/{sampleID}_R1'
+sampleLevel: 'pasilla/{sampleID}/{sampleID}'
+aggLevel: 'pasilla/agg/{treatment}'
+
 shell_prefix: "source lcdb-workflows.bashrc; "
 cluster_default:
   args: "--time=04:00:00"
