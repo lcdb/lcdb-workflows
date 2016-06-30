@@ -9,17 +9,17 @@ HERE = os.path.dirname(os.path.realpath(__file__))
 os.chdir(HERE)
 
 configYaml = """
-sampletable: ../../test/pasilla_sampletable.tsv
-sample_dir: ../../pasilla
+sampletable: test_sampletable.tsv
+sample_dir: pasilla
 assembly: dm6
-data_dir: /data/LCDB/references
+data_dir: references
 
-rawLevel: '../../test/passilla/{sampleID}/{sampleID}_{treatment}_{replicate}_0001_R1'
-runLevel: '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}_{replicate}_R1'
-sampleLevel: '../../test/passilla_sample/{sampleID}/{sampleID}_{treatment}'
-aggLevel: '../../test/passilla_agg/{treatment}'
+rawLevel: 'pasilla/{sampleID}/{sampleID}_{treatment}_{replicate}_0001_R1'
+runLevel: 'pasilla_sample/{sampleID}/{sampleID}_{treatment}_{replicate}_R1'
+sampleLevel: 'pasilla_sample/{sampleID}/{sampleID}_{treatment}'
+aggLevel: 'pasilla_agg/{treatment}'
 aggLevel2:
-    - '../../test/{treatment}'
+    - '{treatment}'
 """
 
 samples = [
@@ -126,18 +126,18 @@ class TestSampleHandler(unittest.TestCase):
 
     def test_build_targets(self):
         targets = [
-                '../../test/passilla_sample/treated1/treated1_treated_1_R1.fastq.gz',
-                '../../test/passilla_sample/treated2/treated2_treated_2_R1.fastq.gz',
-                '../../test/passilla_sample/untreated1/untreated1_untreated_1_R1.fastq.gz',
-                '../../test/passilla_sample/untreated2/untreated2_untreated_2_R1.fastq.gz',
-                '../../test/passilla_sample/treated1/treated1_treated_1_R1.sort.bam',
-                '../../test/passilla_sample/treated2/treated2_treated_2_R1.sort.bam',
-                '../../test/passilla_sample/untreated1/untreated1_untreated_1_R1.sort.bam',
-                '../../test/passilla_sample/untreated2/untreated2_untreated_2_R1.sort.bam',
-                '../../test/passilla_sample/treated1/treated1_treated.merged.sort.bam',
-                '../../test/passilla_sample/treated2/treated2_treated.merged.sort.bam',
-                '../../test/passilla_sample/untreated1/untreated1_untreated.merged.sort.bam',
-                '../../test/passilla_sample/untreated2/untreated2_untreated.merged.sort.bam',
+                'pasilla_sample/treated1/treated1_treated_1_R1.fastq.gz',
+                'pasilla_sample/treated2/treated2_treated_2_R1.fastq.gz',
+                'pasilla_sample/untreated1/untreated1_untreated_1_R1.fastq.gz',
+                'pasilla_sample/untreated2/untreated2_untreated_2_R1.fastq.gz',
+                'pasilla_sample/treated1/treated1_treated_1_R1.sort.bam',
+                'pasilla_sample/treated2/treated2_treated_2_R1.sort.bam',
+                'pasilla_sample/untreated1/untreated1_untreated_1_R1.sort.bam',
+                'pasilla_sample/untreated2/untreated2_untreated_2_R1.sort.bam',
+                'pasilla_sample/treated1/treated1_treated.merged.sort.bam',
+                'pasilla_sample/treated2/treated2_treated.merged.sort.bam',
+                'pasilla_sample/untreated1/untreated1_untreated.merged.sort.bam',
+                'pasilla_sample/untreated2/untreated2_untreated.merged.sort.bam',
                 'otherfile.txt'
                 ]
         self.assertEqual(set(self.SH.build_targets(patterns)), set(targets))
