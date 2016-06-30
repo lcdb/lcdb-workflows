@@ -1,1 +1,16 @@
-../test/requirements.txt
+snakemake
+fastqc
+pandas
+cutadapt >=1.9.1
+multiqc
+jsonschema
+samtools
+hisat2
+fastq-screen
+preseq
+bowtie2>=2.2.8
+picard>=2.3.0-0
+bioconductor-dupradar
+subread
+kallisto
+sphinx
