@@ -3,7 +3,12 @@ os:
 
 language: c
 
+sudo: required
+
+services:
+  - docker
+
 before_install:
   - docker pull continuumio/anaconda
 
-script: docker run -it -v $(pwd):/tmp /bin/bash travis-test.sh
+script: docker run -it -v $(pwd):/tmp continuumio/anaconda /bin/bash /tmp/travis-test.sh
