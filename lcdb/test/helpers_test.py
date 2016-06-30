@@ -45,7 +45,7 @@ class TestHelperFunctions(unittest.TestCase):
 
     def tearDown(self):
         os.remove(self.tempFile)
-    
+
     def test_validate_config(self):
         #TODO: Need to get schema checking and default config setup
         pass
@@ -53,8 +53,7 @@ class TestHelperFunctions(unittest.TestCase):
     def test_wrapper_for(self):
         wrapper_for = helpers.build_wrapper_for(HERE, '../../wrappers')
         result = wrapper_for('cutadapt')
-        result_trim = re.sub(r'.*(/lcdb-workflows/.*)', r'\1', result)
-        self.assertEqual(result_trim, '/lcdb-workflows/lcdb/test/../../wrappers/cutadapt')
+        assert os.path.exists(os.path.join(result, 'wrapper.py'))
 
     def test_build_params_for(self):
         params_for = helpers.build_params_for(self.config)
@@ -69,8 +68,7 @@ class TestHelperFunctions(unittest.TestCase):
 
         # Wrapper For
         result = wrapper_for('cutadapt')
-        result_trim = re.sub(r'.*(/lcdb-workflows/.*)', r'\1', result)
-        self.assertEqual(result_trim, '/lcdb-workflows/lcdb/test/../../wrappers/cutadapt')
+        assert os.path.exists(os.path.join(result, 'wrapper.py'))
 
         # Params For
         params_for = helpers.build_params_for(self.config)
