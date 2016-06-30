@@ -43,7 +43,7 @@ Here are some common use-cases. These examples use the "mapping" workflow.
 **Minimal test:** Assumes environment `lcdb-workflows-$USER-env` exists and data
 have been downloaded. If you're on an interactive node, all your allocated
 cores will be used. This is the version you'll probably use the most when
-devleoping a new wrapper or rule or workflow.
+developing a new wrapper or rule or workflow.
 
 ```bash
 test/run_test.py workflows/mapping/Snakefile
@@ -79,5 +79,5 @@ node. Note that the config file contains per-rule thread and memory settings,
 so `--threads` and `--mem` are unused.
 
 ```bash
-test/run_test.py workflows/mapping/Snakefile--cluster --clean --build-env
+test/run_test.py workflows/mapping/Snakefile --cluster --clean --build-env
 ```
