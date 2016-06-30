@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 env:
 	python test/run_test.py --build-env --no-test workflows/mapping/Snakefile
 
