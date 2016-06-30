@@ -7,7 +7,7 @@ import uuid
 import sys
 
 HERE = os.path.realpath(os.path.dirname(__file__))
-ENV_NAME = 'lcdb-workflows-%s-env' % os.environ['USER']
+ENV_NAME = 'lcdb-workflows-%s-env' % os.environ.get('USER', 'USER')
 REQUIREMENTS = os.path.join(HERE, 'requirements.txt')
 BLUE = '\033[94m'
 GREEN = '\033[92m'
