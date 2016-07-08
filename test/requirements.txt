@@ -13,4 +13,5 @@ picard>=2.3.0-0
 bioconductor-dupradar
 subread
 kallisto
+r-sleuth
 sphinx
