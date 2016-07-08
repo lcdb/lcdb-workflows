@@ -46,7 +46,12 @@
 <div class="code yaml highlight-default"><div class="highlight"><pre><span></span><span class="n">sampletable</span><span class="p">:</span> <span class="n">pasilla_sampletable</span><span class="o">.</span><span class="n">tsv</span>
 <span class="n">sample_dir</span><span class="p">:</span> <span class="n">pasilla</span>
 <span class="n">assembly</span><span class="p">:</span> <span class="n">dm6</span>
-<span class="n">data_dir</span><span class="p">:</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">LCDB</span><span class="o">/</span><span class="n">references</span><span class="o">-</span><span class="n">test</span>
+<span class="n">data_dir</span><span class="p">:</span> <span class="n">references</span><span class="o">-</span><span class="n">test</span>
+
+<span class="n">rawLevel</span><span class="p">:</span> <span class="s1">&#39;pasilla/</span><span class="si">{sampleID}</span><span class="s1">/</span><span class="si">{sampleID}</span><span class="s1">_R1&#39;</span>
+<span class="n">runLevel</span><span class="p">:</span> <span class="s1">&#39;pasilla/</span><span class="si">{sampleID}</span><span class="s1">/</span><span class="si">{sampleID}</span><span class="s1">_R1&#39;</span>
+<span class="n">sampleLevel</span><span class="p">:</span> <span class="s1">&#39;pasilla/</span><span class="si">{sampleID}</span><span class="s1">/</span><span class="si">{sampleID}</span><span class="s1">&#39;</span>
+<span class="n">aggLevel</span><span class="p">:</span> <span class="s1">&#39;pasilla/agg/</span><span class="si">{treatment}</span><span class="s1">&#39;</span>
 
 <span class="n">shell_prefix</span><span class="p">:</span> <span class="s2">&quot;source lcdb-workflows.bashrc; &quot;</span>
 <span class="n">cluster_default</span><span class="p">:</span>
