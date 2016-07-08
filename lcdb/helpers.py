@@ -2,7 +2,7 @@ import os
 import pandas
 import yaml
 from jsonschema import validate, ValidationError
-
+from snakemake.shell import shell
 
 def validate_config(config, schema):
     schema = yaml.load(open(schema))
@@ -90,3 +90,26 @@ def load_sampletable(filename):
     """
     return pandas.read_table(filename, index_col=0)
 
+
+def rscript(string, scriptname, log=None):
+    """
+    Saves the string as `scriptname` and then runs it
+
+    Parameters
+    ----------
+    string : str
+        Filled-in template to be written as R script
+
+    scriptname : str
+        File to save script to
+
+    log : str
+        File to redirect stdout and stderr to. If None, no redirection occurs.
+    """
+    with open(scriptname, 'w') as fout:
+        fout.write(string)
+    if log:
+        _log = '> {0} 2>&1'.format(log)
+    else:
+        _log = ""
+    shell('Rscript {scriptname} {_log}')
