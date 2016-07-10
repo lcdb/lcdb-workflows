@@ -24,6 +24,7 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html       to make standalone HTML files"
+	@echo "  dags       to build DAGs"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
 	@echo "  pickle     to make pickle files"
@@ -60,7 +61,7 @@ clean:
 # dag-building
 #
 # List of workflows for which we should build dag images
-WORKFLOWS = references mapping
+WORKFLOWS = references mapping kallisto
 
 # The config to use for building dags
 CONFIG = ../workflows/mapping/config.yaml
@@ -69,6 +70,7 @@ CONFIG = ../workflows/mapping/config.yaml
 RULEGRAPHPNGS = $(addprefix source/images/,$(addsuffix _dag.png,$(WORKFLOWS)))
 DAGPNGS = $(addprefix source/images/,$(addsuffix _full_dag.png,$(WORKFLOWS)))
 
+.PHONY: dags
 dags: $(DAGPNGS) $(RULEGRAPHPNGS)
 
 source/images/%_full_dag.png: ../workflows/%/Snakefile $(CONFIG)
