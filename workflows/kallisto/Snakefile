@@ -1,0 +1,104 @@
+# -*- snakemake -*-
+
+import yaml
+import itertools
+import pandas
+import sys
+from textwrap import dedent
+
+try:
+    config.update(yaml.load(open('config.yaml')))
+except IOError:
+    raise IOError('No "config.yaml" found; please supply another config '
+                  ' file using the --configfile argument')
+
+shell.prefix(config.get('shell_prefix', ''))
+
+# ----------------------------------------------------------------------------
+# Helper functions
+#
+HERE = srcdir('')
+WRAPPERS = '../../wrappers'
+sys.path.insert(0, os.path.join(HERE, '../../lcdb'))
+import helpers
+wrapper_for, params_for, threads_for = helpers.workflow_helper_functions(config, HERE, WRAPPERS)
+
+from interface import SampleHandler
+
+
+sampletable = helpers.load_sampletable(config['sampletable'])
+samples = sampletable.index.tolist()
+
+include: '../references/Snakefile'
+
+# ----------------------------------------------------------------------------
+# Generate final targets
+#
+patterns = [
+    '{{sample_dir}}/{{sampleID}}/kallisto/abundance.h5',
+    '{{sample_dir}}/kallisto/sampletable.tsv',
+    '{{sample_dir}}/kallisto/results.txt',
+]
+# ----------------------------------------------------------------------------
+
+SH = SampleHandler(config)
+
+targets = SH.build_targets(patterns)
+rule all:
+    input: targets
+
+
+rule clean:
+    run:
+        if os.path.exists(config['sample_dir']):
+            shell('rm -r {config[sample_dir]}')
+        shell('wget -O - http://helix.nih.gov/~dalerr/lcdb-workflows-data/pasilla.tar > pasilla.tar')
+        shell('tar -xvf pasilla.tar')
+        shell('rm pasilla.tar')
+
+rule kallisto_quant:
+    input:
+        fastq="{sample_dir}/{sample}/{sample}_R1.fastq.gz",
+        index=os.path.join(config['data_dir'], config['rules']['kallisto_quant']['index'])
+    output: "{sample_dir}/{sample}/kallisto/abundance.h5"
+    params: extra=config['rules']['kallisto_quant']['params']['extra']
+    wrapper:
+        wrapper_for('kallisto/kallisto-quant')
+
+rule kallisto_sampletable:
+    input: config['sampletable']
+    output: '{sample_dir}/kallisto/sampletable.tsv'
+    run:
+        df = pandas.read_table(input[0], sep='\t')
+        def path(x):
+            return rules.kallisto_quant.output[0].format(
+                sample_dir=config['sample_dir'], sample=x)
+        df['path'] = df.sampleID.apply(path)
+        cols = list(df.columns)
+        cols[0] = 'sample'
+        df.columns = cols
+        df.to_csv(output[0], sep='\t', index=False)
+
+rule sleuth:
+    input:
+        sampletable=rules.kallisto_sampletable.output,
+        quant=[i for i in targets if i.endswith('abundance.h5')]
+    output:
+        results='{sample_dir}/kallisto/results.txt',
+        script='{sample_dir}/kallisto/script.R',
+    log: '{sample_dir}/kallisto/results.log'
+    run:
+        template = dedent(r"""
+        library(sleuth)
+        s2c <- read.table('{input.sampletable}', sep='\t', header=T, stringsAsFactors=F)
+        so <- sleuth_prep(s2c, {config[rules][sleuth][model]})
+        so <- sleuth_fit(so)
+        so <- sleuth_fit(so, ~1, 'reduced')
+        so <- sleuth_lrt(so, 'reduced', 'full')
+        results_table <- sleuth_results(so, 'reduced:full', test_type='lrt')
+        write.table(results_table, file='{output.results}', sep='\t')
+        """).format(config=config, **locals())
+
+        helpers.rscript(template, output.script, log)
+
+# vim: ft=python
