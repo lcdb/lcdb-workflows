@@ -8,7 +8,9 @@ import sys
 
 HERE = os.path.realpath(os.path.dirname(__file__))
 ENV_NAME = 'lcdb-workflows-%s-env' % os.environ.get('USER', '')
+ENV_NAME_PY2 = ENV_NAME + '-py2'
 REQUIREMENTS = os.path.join(HERE, 'requirements.txt')
+REQUIREMENTS_PY2 = os.path.join(HERE, 'requirements-py2.txt')
 BLUE = '\033[94m'
 GREEN = '\033[92m'
 YELLOW = '\033[93m'
@@ -98,6 +100,7 @@ def env_exists(name):
         )
     )
 
+
 def create_env(name):
     """
     Remove environment if it exists and build a new one.
@@ -115,8 +118,26 @@ def create_env(name):
         'conda', 'create', '-n', name, '--file', REQUIREMENTS, '-c', 'bioconda', '-c', 'r', 'python=3', '-y'])
 
 
+def create_py2_env(name):
+    """
+    Remove environment if it exists and build a new one.
+    """
+    if env_exists(name):
+        print(
+            YELLOW
+            + 'conda env '
+            + name + ' exists, removing and rebuilding based on '
+            + REQUIREMENTS_PY2
+            + ENDC)
+        sp.check_call([
+            'conda', 'remove', '-n', name, '--all'])
+    sp.check_call([
+        'conda', 'create', '-n', name, '--file', REQUIREMENTS_PY2, '-c', 'bioconda', '-c', 'r', 'python=2', '-y'])
+
+
 if args.build_env:
     create_env(ENV_NAME)
+    create_py2_env(ENV_NAME_PY2)
 
 DIRECTORY = os.path.dirname(args.workflow)
 SNAKEMAKE = "snakemake --directory {DIRECTORY} -s {args.workflow}".format(**locals())

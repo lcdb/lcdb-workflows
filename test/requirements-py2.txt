@@ -1,0 +1,3 @@
+spanki
+scipy
+samtools <1.3

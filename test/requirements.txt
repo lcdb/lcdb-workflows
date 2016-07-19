@@ -15,3 +15,4 @@ subread
 kallisto
 r-sleuth
 sphinx
+astalavista
