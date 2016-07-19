@@ -1,0 +1,128 @@
+# -*- snakemake -*-
+
+import os
+import yaml
+import itertools
+import pandas
+import sys
+from textwrap import dedent
+
+try:
+    config.update(yaml.load(open('config.yaml')))
+except IOError:
+    raise IOError('No "config.yaml" found; please supply another config '
+                  ' file using the --configfile argument')
+
+shell.prefix(config.get('shell_prefix', ''))
+
+user = os.environ.get('USER')
+
+# ----------------------------------------------------------------------------
+# Helper functions
+#
+HERE = srcdir('')
+WRAPPERS = '../../wrappers'
+sys.path.insert(0, os.path.join(HERE, '../../lcdb'))
+import helpers
+wrapper_for, params_for, threads_for = helpers.workflow_helper_functions(config, HERE, WRAPPERS)
+
+from interface import SampleHandler
+
+
+sampletable = helpers.load_sampletable(config['sampletable'])
+samples = sampletable.index.tolist()
+
+include: '../references/Snakefile'
+
+
+subworkflow mapping:
+    workdir: '../mapping'
+    snakefile: '../mapping/Snakefile'
+
+ALIGNER = config['rules']['align']['aligner']
+ALIGNER_PREFIX = config['rules']['align']['prefix']
+ALIGNER_TAG= {'bowtie2': 'bt2',  'hisat2': 'ht2'}[ALIGNER]
+
+if ALIGNER == 'hisat2':
+    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
+                           prefix=ALIGNER_PREFIX,
+                           n=range(1, 9),
+                           tag=ALIGNER_TAG,
+                           data_dir = config['data_dir'])
+
+if ALIGNER == 'bowtie2':
+    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
+                           prefix=ALIGNER_PREFIX,
+                           n=range(1, 5),
+                           tag=ALIGNER_TAG,
+                           data_dir = config['data_dir'])
+
+config['aligner_tag'] = ALIGNER_TAG
+
+# ----------------------------------------------------------------------------
+# Generate final targets
+#
+patterns = []
+patterns.extend([
+    #'{{sample_dir}}/{{sampleID}}/kallisto/abundance.h5',
+    #'{{sample_dir}}/kallisto/sampletable.tsv',
+    #'{{sample_dir}}/kallisto/results.txt',
+    'astalavista-output.gtf.gz',
+    '{{sample_dir}}/{{sampleID}}/juncs.all',
+
+])
+print('\n'.join(patterns))
+# ----------------------------------------------------------------------------
+
+SH = SampleHandler(config)
+
+targets = SH.build_targets(patterns)
+rule all_spanki:
+    input: targets
+
+
+rule clean_spanki:
+    run:
+        if os.path.exists(config['sample_dir']):
+            shell('rm -r {config[sample_dir]}')
+        shell('wget -O - http://helix.nih.gov/~dalerr/lcdb-workflows-data/pasilla.tar > pasilla.tar')
+        shell('tar -xvf pasilla.tar')
+        shell('rm pasilla.tar')
+
+
+rule unzip_gtf:
+    input: os.path.join(config['data_dir'], config['rules']['astalavista']['gtf'])
+    output: 'astalavista-input.gtf'
+    shell:
+        "gunzip -c {input} > {output}"
+
+rule unzip_fasta_spanki:
+    input: os.path.join(config['data_dir'], config['rules']['spankijunc']['fasta'])
+    output: temporary('spanki-fasta.fa')
+    shell:
+        "gunzip -c {input} > {output}"
+
+rule astalavista:
+    input: gtf='astalavista-input.gtf'
+    output: 'astalavista-output.gtf.gz'
+    log: 'astalavista-asta.log'
+    params: extra=" -e [ASE,ASI]"
+    wrapper:
+        wrapper_for('astalavista/asta')
+
+rule spankijunc:
+    input:
+        bam=mapping('{{sample_dir}}/{{sampleID}}/{{sampleID}}_R1.cutadapt.{tag}.bam'.format(tag=ALIGNER_TAG)),
+        gtf=rules.unzip_gtf.output,
+        fasta=rules.unzip_fasta_spanki.output
+    output: '{sample_dir}/{sampleID}/juncs.all'
+    shell:
+        'source activate lcdb-workflows-{user}-env-py2; '
+        'spankijunc -m all '
+        '-i {input.bam} '
+        '-o $(dirname {output}) '
+        '-g {input.gtf} '
+        '-f {input.fasta} '
+
+
+# vim: ft=python

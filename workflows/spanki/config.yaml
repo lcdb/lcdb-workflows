@@ -1,0 +1,56 @@
+sampletable: pasilla_sampletable.tsv
+sample_dir: pasilla
+assembly: dm6
+data_dir: references
+
+rawLevel: 'pasilla/{sampleID}/{sampleID}_R1'
+runLevel: 'pasilla/{sampleID}/{sampleID}_R1'
+sampleLevel: 'pasilla/{sampleID}/{sampleID}'
+aggLevel: 'pasilla/agg/{treatment}'
+
+shell_prefix: "source lcdb-workflows.bashrc; "
+cluster_default:
+  args: "--time=04:00:00"
+
+rules:
+
+  astalavista:
+    gtf: 'dm6/dm6_r6-11.gtf.gz'
+
+  spankijunc:
+    fasta: 'dm6/dm6_default.fa.gz'
+
+  align:
+    aligner: hisat2
+    prefix: dm6/hisat2/dm6_default
+    params:
+      extra: '--max-intronlen=5000'
+    threads: 8
+    cluster:
+      args: "--mem=32g"
+
+  cutadapt:
+    params:
+      extra: '-a file:adapters.fa --quality-cutoff 20 --minimum-length 25 --overlap 10'
+
+  samtools_unique:
+    params:
+      extra: '-q 20 -b'
+
+references:
+
+  -
+    assembly: 'dm6'
+    type: 'gtf'
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/gtf/dmel-all-r6.11.gtf.gz'
+    postprocess: "dm6.gtf_postprocess"
+    tag: 'r6-11'
+    conversions:
+      - 'intergenic'
+  -
+    assembly: 'dm6'
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-chromosome-r6.11.fasta.gz'
+    postprocess: "dm6.fasta_postprocess"
+    type: 'fasta'
+    indexes:
+      - 'hisat2'
