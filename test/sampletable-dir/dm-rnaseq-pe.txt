@@ -1,0 +1,5 @@
+sra_id	sample_id	condition	replicate
+SRR948304	WT1	WT	1
+SRR948305	WT2	WT	2
+SRR948306	KO1	KO	1
+SRR948307	KO2	KO	2
