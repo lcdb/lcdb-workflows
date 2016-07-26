@@ -3,6 +3,12 @@ import pandas
 import yaml
 from jsonschema import validate, ValidationError
 from snakemake.shell import shell
+from snakemake.io import expand
+
+ALIGNER_TAGS = {
+    'bowtie2': 'bt2',
+    'hisat2': 'ht2',
+}
 
 def validate_config(config, schema):
     schema = yaml.load(open(schema))
@@ -12,6 +18,7 @@ def validate_config(config, schema):
     except ValidationError as e:
         msg = '\nPlease fix %s: %s\n' % (config, e.message)
         raise ValidationError(msg)
+
 
 def build_wrapper_for(source_dir, wrappers_dir):
     """
@@ -28,6 +35,7 @@ def build_wrapper_for(source_dir, wrappers_dir):
     def wrapper_for(tool):
         return os.path.join(source_dir, wrappers_dir, tool)
     return wrapper_for
+
 
 def build_params_for(config):
     """
@@ -113,3 +121,47 @@ def rscript(string, scriptname, log=None):
     else:
         _log = ""
     shell('Rscript {scriptname} {_log}')
+
+
+def aligner_tag(config):
+    return ALIGNER_TAGS[config['rules']['align']['aligner']]
+
+
+def aligner(config):
+    return config['rules']['align']['aligner']
+
+
+def aligner_index(config):
+    aligner = config['rules']['align']['aligner']
+    if aligner == 'hisat2':
+        return expand('{data_dir}/{prefix}.{n}.{tag}',
+                      prefix=config['rules']['align']['prefix'],
+                      n=range(1, 9),
+                      tag=aligner_tag(config),
+                      data_dir=config['data_dir'])
+
+    elif aligner == 'bowtie2':
+        return expand('{data_dir}/{prefix}.{n}.{tag}',
+                      prefix=config['rules']['align']['prefix'],
+                      n=range(1, 5),
+                      tag=aligner_tag(config),
+                      data_dir=config['data_dir'])
+
+    else:
+        raise ValueError('Unsupported aligner "{}"'.format(aligner))
+
+
+def fastq_screen_config_inputs(config):
+     """
+     Returns indexes and a table (as string) that can be written directly to
+     a config file.
+
+     Use indexes as the input to a rule; use the table to build a config file.
+     """
+     indexes = config['rules']['fastq_screen']['indexes']
+     aligner = config['rules']['fastq_screen']['aligner']
+     inputs = []
+     for label, prefix in indexes.items():
+         prefix = os.path.join(config['data_dir'], prefix)
+         inputs.extend(expand(prefix + '.{n}.bt2', n=[1, 2, 3, 4]))
+     return inputs

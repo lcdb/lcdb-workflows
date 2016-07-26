@@ -24,57 +24,36 @@ wrapper_for, params_for, threads_for = helpers.workflow_helper_functions(config,
 
 from interface import SampleHandler
 
-
-def fastq_screen_config_inputs():
-    """
-    Returns indexes and a table (as string) that can be written directly to
-    a config file.
-
-    Use indexes as the input to a rule; use the table to build a config file.
-    """
-    indexes = config['rules']['fastq_screen']['indexes']
-    aligner = config['rules']['fastq_screen']['aligner']
-    inputs = []
-    for label, prefix in indexes.items():
-        prefix = os.path.join(config['data_dir'], prefix)
-        inputs.extend(expand(prefix + '.{n}.bt2', n=[1, 2, 3, 4]))
-    return inputs
-
-
 sampletable = helpers.load_sampletable(config['sampletable'])
 samples = sampletable.index.tolist()
 
 include: '../references/Snakefile'
 
-# ----------------------------------------------------------------------------
-# Aligner configuration.
-#
-ALIGNER = config['rules']['align']['aligner']
-ALIGNER_PREFIX = config['rules']['align']['prefix']
-ALIGNER_TAG= {'bowtie2': 'bt2',  'hisat2': 'ht2'}[ALIGNER]
+ALIGNER = helpers.aligner(config)
+ALIGNER_TAG = helpers.aligner_tag(config)
+ALIGNER_INDEX = helpers.aligner_index(config)
 
-if ALIGNER == 'hisat2':
-    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
-                           prefix=ALIGNER_PREFIX,
-                           n=range(1, 9),
-                           tag=ALIGNER_TAG,
-                           data_dir = config['data_dir'])
+patterns = []
 
-if ALIGNER == 'bowtie2':
-    ALIGNER_INDEX = expand('{data_dir}/{prefix}.{n}.{tag}',
-                           prefix=ALIGNER_PREFIX,
-                           n=range(1, 5),
-                           tag=ALIGNER_TAG,
-                           data_dir = config['data_dir'])
+# optional rules
+if 'fastq_screen' in config['rules']:
+    patterns.extend([
+        'fastq_screen_config.txt',
+        '{runLevel}.fastq_screen.txt',
+        '{runLevel}.fastq_screen.png'])
+    patterns.extend(helpers.fastq_screen_config_inputs(config))
+
+if 'fastqc' in config['rules']:
+    patterns.extend([
+        '{runLevel}.fastqc.html',
+        '{runLevel}.cutadapt.fastqc.html',
+    ])
+
 
 # ----------------------------------------------------------------------------
 # Generate final targets
 #
 patterns = [
-    '{runLevel}.fastqc.html',
-    '{runLevel}.fastq_screen.txt',
-    '{runLevel}.fastq_screen.png',
-    '{runLevel}.cutadapt.fastqc.html',
     '{runLevel}.cutadapt.fastq.gz',
     '{runLevel}.cutadapt.{aligner_tag}.bam',
     '{runLevel}.cutadapt.{aligner_tag}.unique.bam.observed_complexity',
@@ -84,8 +63,7 @@ patterns = [
     '{runLevel}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics',
     '{aggLevel}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam',
     'multiqc_report.html',
-    'fastq_screen_config.txt',
-] + fastq_screen_config_inputs() + ALIGNER_INDEX
+]
 # ----------------------------------------------------------------------------
 
 
@@ -93,7 +71,7 @@ config['aligner_tag'] = ALIGNER_TAG
 SH = SampleHandler(config)
 
 targets = SH.build_targets(patterns)
-rule all:
+rule all_mapping:
     input: targets
 
 
@@ -159,33 +137,34 @@ rule multiqc:
 
 
 
-rule fastq_screen_config_file:
-    input: fastq_screen_config_inputs()
-    output: 'fastq_screen_config.txt'
-    run:
-        indexes = config['rules']['fastq_screen']['indexes']
-        aligner = config['rules']['fastq_screen']['aligner']
-        inputs = []
-        table = []
-        for label, prefix in indexes.items():
-            prefix = os.path.join(config['data_dir'], prefix)
-            table.append(['DATABASE', label, prefix, aligner.upper()])
+if 'fastqc_screen' in config['rules']:
+    rule fastq_screen_config_file:
+        input: helpers.fastq_screen_config_inputs(config)
+        output: 'fastq_screen_config.txt'
+        run:
+            indexes = config['rules']['fastq_screen']['indexes']
+            aligner = config['rules']['fastq_screen']['aligner']
+            inputs = []
+            table = []
+            for label, prefix in indexes.items():
+                prefix = os.path.join(config['data_dir'], prefix)
+                table.append(['DATABASE', label, prefix, aligner.upper()])
 
-        with open(output[0], 'w') as fout:
-            fout.write('\n'.join(['\t'.join(i) for i in sorted(table)]) + '\n')
+            with open(output[0], 'w') as fout:
+                fout.write('\n'.join(['\t'.join(i) for i in sorted(table)]) + '\n')
 
 
-rule fastq_screen:
-    input:
-        '{prefix}.fastq.gz',
-        'fastq_screen_config.txt'
-    output:
-        txt='{prefix}.fastq_screen.txt',
-        png='{prefix}.fastq_screen.png'
-    log: '{prefix}.fastq_screen.log'
-    params: fastq_screen_config='fastq_screen_config.txt'
-    wrapper:
-        wrapper_for('fastq_screen')
+    rule fastq_screen:
+        input:
+            '{prefix}.fastq.gz',
+            'fastq_screen_config.txt'
+        output:
+            txt='{prefix}.fastq_screen.txt',
+            png='{prefix}.fastq_screen.png'
+        log: '{prefix}.fastq_screen.log'
+        params: fastq_screen_config='fastq_screen_config.txt'
+        wrapper:
+            wrapper_for('fastq_screen')
 
 
 rule samtools_unique:
