@@ -38,34 +38,6 @@ class Image(object):
     def __str__(self):
         return self.image
 
-class Panel(object):
-    """ Image panel class """
-
-    def __init__(self):
-        self.table = dedent("""<table>
-        </table>""")
-
-    def add_row(self, imageStrings, caption=None):
-        cells = ' '.join(['<td>{0}</td>'.format(str(x)) for x in imageStrings])
-
-        if caption:
-            caption = "<td>{0}</td>".format(caption)
-        else:
-            caption = ''
-
-        row = dedent("""<tr>{caption}
-        {cells}
-        </tr>
-        </table>""".format(cells=cells, caption=caption))
-
-        self.table = self.table.replace('</table>', row)
-
-    def __repr__(self):
-        return self.table
-
-    def __str__(self):
-        return self.table
-
 def report():
     """ Build a report """
     pass

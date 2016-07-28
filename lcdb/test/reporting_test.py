@@ -27,14 +27,6 @@ imgB64 = ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAAGkCAIAAADxLsZiAAA
           'BA7IEHsgASxAxLEDkgQOyBB7IAEsQMSxA5IEDsgQeyABLEDEsQOSBA7IEHsgASxAxLEDkgQOyBB7IAEsQMSxA5IEDsgQeyABLEDEs'
           'QOSBA7IEHsgASxAxLEDkgQOyBB7IAEsQMSxA5I+AwAAP//bQod9OCtuVwAAAAASUVORK5CYII=')
 
-def writeHtml(string):
-    with open('tmp.html', 'w') as OUT:
-        OUT.write(dedent("""<html>
-        <body>
-        {0}
-        </body>
-        </html>""".format(string)))
-
 def renderHtml(string):
         from lcdb.reporting import ENV
         with open('tmp_render.html', 'w') as OUT:
@@ -54,19 +46,6 @@ class TestReport(unittest.TestCase):
         from lcdb.reporting import Image
         img = Image(self.imageFile)
         self.assertEqual(str(img), imgB64)
-
-    def test_panel_add_row(self):
-        from lcdb.reporting import Panel
-        table = Panel()
-        table.add_row([imgB64, imgB64, imgB64])
-
-        exampleTable = dedent("""<table>
-        <tr>
-        <td>{img}</td> <td>{img}</td> <td>{img}</td>
-        </tr>
-        </table>""".format(img=imgB64))
-
-        self.assertEqual(str(table), exampleTable)
 
     def test_jinja_panel_with_caption(self):
         from lcdb.reporting import JinjaPanel, Image, ENV
