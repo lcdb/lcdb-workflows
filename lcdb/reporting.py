@@ -13,13 +13,20 @@ TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 loader = jinja2.FileSystemLoader(TEMPLATES_DIR)
 ENV = jinja2.Environment(loader=loader)
 
+def report():
+    """ Build a report """
+    pass
+
+
 class Report(object):
     """ Basic report class """
     pass
 
+
 class Section(object):
     """ Basic section class """
     pass
+
 
 class Image(object):
     """ Image class """
@@ -38,9 +45,18 @@ class Image(object):
     def __str__(self):
         return self.image
 
-def report():
-    """ Build a report """
-    pass
+
+class Text(object):
+    """ Class to convert text to HTML """
+    def __init__(self, text):
+        md = markdown.Markdown(output_format='html5')
+        self.html = md.convert(text)
+    
+    def __repr__(self):
+        return self.html
+
+    def __str__(self):
+        return self.html
 
 
 class JinjaPanel(object):
