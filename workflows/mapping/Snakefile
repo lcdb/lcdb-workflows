@@ -1,4 +1,6 @@
 # -*- snakemake -*-
+# vim: ft=python
+# vim: syntax=snakemake
 
 import yaml
 import itertools
@@ -85,6 +87,7 @@ patterns = [
     '{aggLevel}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam',
     'multiqc_report.html',
     'fastq_screen_config.txt',
+    'report.html',
 ] + fastq_screen_config_inputs() + ALIGNER_INDEX
 # ----------------------------------------------------------------------------
 
@@ -249,4 +252,18 @@ rule merge_bam:
     wrapper:
         wrapper_for('samtools/merge')
 
-# vim: ft=python
+rule report:
+    input: F1='img.png'
+    output: html='report.html'
+    run:
+        report("""
+        =======================
+        The title of the report
+        =======================
+
+        This is a test report
+
+        F1
+
+        """, output.html, metadata="Bob", **input)
+

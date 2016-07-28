@@ -16,3 +16,4 @@ docs/source/images/*_dag.png
 /docs/source/config.yaml
 /workflows/mapping/fastq_screen_config.txt
 /workflows/mapping/Snakefile.log
+.DS_Store

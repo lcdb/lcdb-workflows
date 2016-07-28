@@ -1,0 +1,10 @@
+<div class="row">
+    <div class="legend">{{ caption }}</div>
+    {% for image in images %}
+        <div class="col-sm-3 thumbnail figure">
+            <div class="legend">{{ image.name }}</div>
+            <a href="{{ image.image }}"><img src="{{ image.image }}" /></a>
+            <div class="legend">{{ image.caption }}</div>
+        </div>
+    {% endfor %}
+</div>

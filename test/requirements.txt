@@ -15,3 +15,5 @@ subread
 kallisto
 r-sleuth
 sphinx
+Markdown
+jinja2
