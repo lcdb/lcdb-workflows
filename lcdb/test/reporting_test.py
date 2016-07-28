@@ -68,31 +68,61 @@ class TestReport(unittest.TestCase):
 
         self.assertEqual(str(table), exampleTable)
 
-    def test_panel_with_caption(self):
-        from lcdb.reporting import Panel
-        table = Panel()
-        table.add_row([imgB64, imgB64, imgB64], caption='Row caption')
-        table.add_row([imgB64, imgB64, imgB64], caption='Row caption2')
-
-        exampleTable = dedent("""<table>
-        <tr>
-        <td>{img}</td> <td>{img}</td> <td>{img}</td>
-        </tr>
-        </table>""".format(img=imgB64))
-
-        writeHtml(str(table))
-
-        #self.assertEqual(str(table), exampleTable)
-
     def test_jinja_panel_with_caption(self):
         from lcdb.reporting import JinjaPanel, Image, ENV
         img1 = Image(self.imageFile, name='Sample1', caption='male')
         img2 = Image(self.imageFile, name='Sample2', caption='female')
         img3 = Image(self.imageFile, name='Sample3', caption='male')
+
+        examplePanel = dedent("""\
+        <div class="row">
+            <div class="legend">Row caption</div>
+ 
+                <div class="col-sm-3 thumbnail figure">
+                    <div class="legend">Sample1</div>
+                    <a href="{0}"><img src="{0}" /></a>
+                    <div class="legend">male</div>
+                </div>
+ 
+                <div class="col-sm-3 thumbnail figure">
+                    <div class="legend">Sample2</div>
+                    <a href="{0}"><img src="{0}" /></a>
+                    <div class="legend">female</div>
+                </div>
+ 
+                <div class="col-sm-3 thumbnail figure">
+                    <div class="legend">Sample3</div>
+                    <a href="{0}"><img src="{0}" /></a>
+                    <div class="legend">male</div>
+                </div>
+ 
+        </div><div class="row">
+            <div class="legend">Row caption2</div>
+    
+                <div class="col-sm-3 thumbnail figure">
+                    <div class="legend">Sample1</div>
+                    <a href="{0}"><img src="{0}" /></a>
+                    <div class="legend">male</div>
+                </div>
+ 
+                <div class="col-sm-3 thumbnail figure">
+                    <div class="legend">Sample2</div>
+                    <a href="{0}"><img src="{0}" /></a>
+                    <div class="legend">female</div>
+                </div>
+ 
+                <div class="col-sm-3 thumbnail figure">
+                    <div class="legend">Sample3</div>
+                    <a href="{0}"><img src="{0}" /></a>
+                    <div class="legend">male</div>
+                </div>
+
+        </div>""".format(str(img1)))
+
         table = JinjaPanel()
         table.add_row([img1, img2, img3], caption='Row caption')
         table.add_row([img1, img2, img3], caption='Row caption2')
-        renderHtml(table.panel)
+        self.assertEqual(dedent(table.panel), examplePanel)
 
 
 
