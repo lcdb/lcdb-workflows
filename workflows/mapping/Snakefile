@@ -73,21 +73,25 @@ if ALIGNER == 'bowtie2':
 # Generate final targets
 #
 patterns = [
+    '{runLevel}.fastq.count',
     '{runLevel}.fastqc.html',
     '{runLevel}.fastq_screen.txt',
     '{runLevel}.fastq_screen.png',
     '{runLevel}.cutadapt.fastqc.html',
     '{runLevel}.cutadapt.fastq.gz',
+    '{runLevel}.cutadapt.fastq.count',
     '{runLevel}.cutadapt.{aligner_tag}.bam',
+    '{runLevel}.cutadapt.{aligner_tag}.bam.count',
     '{runLevel}.cutadapt.{aligner_tag}.unique.bam.observed_complexity',
     '{runLevel}.cutadapt.{aligner_tag}.unique.bam.estimated_complexity',
     '{runLevel}.cutadapt.{aligner_tag}.unique.bam.estimated_coverage',
     '{runLevel}.cutadapt.{aligner_tag}.unique.sort.dedup.bam',
+    '{runLevel}.cutadapt.{aligner_tag}.unique.sort.dedup.bam.count',
     '{runLevel}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics',
     '{aggLevel}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam',
+    '{aggLevel}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam.count',
     'multiqc_report.html',
     'fastq_screen_config.txt',
-    'report.html',
 ] + fastq_screen_config_inputs() + ALIGNER_INDEX
 # ----------------------------------------------------------------------------
 
@@ -252,18 +256,36 @@ rule merge_bam:
     wrapper:
         wrapper_for('samtools/merge')
 
+
+rule fastq_count:
+    input: '{prefix}.fastq.gz'
+    output: '{prefix}.fastq.count'
+    shell: "gunzip -c {input[0]} | echo $((`wc -l` / 4)) > {output[0]}"
+
+
+rule bam_count:
+    input: '{prefix}.bam'
+    output: '{prefix}.bam.count'
+    shell: "samtools view -c {input[0]} > {output[0]}"
+
+
+rule count_table:
+    input: 
+    output: csv = 'count_table.csv',
+            html = 'count_table.html'
+    run:
+        import pandas as pd
+        
+
+
 rule report:
     input: F1='img.png'
     output: html='report.html'
     run:
-        report("""
-        =======================
-        The title of the report
-        =======================
+        from lcdb.reporting import report
+        
+        report("""\
+        # Mapping Workflow Report
 
-        This is a test report
-
-        F1
-
-        """, output.html, metadata="Bob", **input)
+        """,  **input)
 
