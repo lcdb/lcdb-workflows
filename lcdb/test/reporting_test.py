@@ -4,9 +4,11 @@ import unittest
 from urllib.request import urlretrieve
 from textwrap import dedent
 
-imgURL = 'https://avatars1.githubusercontent.com/u/7584817?v=3&s=200'
+import pandas as pd
 
-imgB64 = ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAAGkCAIAAADxLsZiAAAFz0lEQVR4nOzXwW2sMABF'
+test_imgURL = 'https://avatars1.githubusercontent.com/u/7584817?v=3&s=200'
+
+test_imgB64 = ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAAGkCAIAAADxLsZiAAAFz0lEQVR4nOzXwW2sMABF'
           '0f8jCqA3FtTIgt5cQhYpINJkgiH3nAb8JM9cmWWM8Q/gr/uYPQDgCmIHJIgdkCB2QILYAQliBySIHZAgdkCC2AEJYgckiB2QIHZA'
           'gtgBCWIHJIgdkCB2QILYAQliBySIHZAgdkCC2AEJYgckiB2QIHZAgtgBCWIHJIgdkCB2QILYAQliBySIHZAgdkCC2AEJYgckLJedd'
           'B7jsrMus+3r7Anv5I7uzx29zMsOSBA7IEHsgASxAxLEDkgQOyBB7IAEsQMSxA5IEDsgQeyABLEDEsQOSBA7IEHsgASxAxLEDkgQOy'
@@ -28,27 +30,119 @@ imgB64 = ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAAGkCAIAAADxLsZiAAA
           'BA7IEHsgASxAxLEDkgQOyBB7IAEsQMSxA5IEDsgQeyABLEDEsQOSBA7IEHsgASxAxLEDkgQOyBB7IAEsQMSxA5IEDsgQeyABLEDEs'
           'QOSBA7IEHsgASxAxLEDkgQOyBB7IAEsQMSxA5I+AwAAP//bQod9OCtuVwAAAAASUVORK5CYII=')
 
-mdownText = dedent("""\
-        # Heading Level 1
+test_imgB64_html = '<a href={0}><img src="{0}"/></a>'.format(test_imgB64)
 
-        This is just a test text document that will be translated into HTML
-        upon rendering. *Some example italics* and maybe some **bold**. 
+test_imagePanel = dedent("""\
+    <div class="row">
+        <div class="legend">Row caption</div>
 
-        * simple bullets 1
-        * simple bullets 2
-        * simple bullets 3
+            <div class="col-sm-3 thumbnail figure">
+                <div class="legend">Sample1</div>
+                <a href="{0}"><img src="{0}" /></a>
+                <div class="legend">male</div>
+            </div>
 
-        ## Heading Level 2
+            <div class="col-sm-3 thumbnail figure">
+                <div class="legend">Sample2</div>
+                <a href="{0}"><img src="{0}" /></a>
+                <div class="legend">female</div>
+            </div>
 
-        1. now some numbers
-        2. now some numbers
-        3. now some numbers
+            <div class="col-sm-3 thumbnail figure">
+                <div class="legend">Sample3</div>
+                <a href="{0}"><img src="{0}" /></a>
+                <div class="legend">male</div>
+            </div>
 
-        ### Heading level 3
+    </div><div class="row">
+        <div class="legend">Row caption2</div>
 
-        Some more text.
-        """)
+            <div class="col-sm-3 thumbnail figure">
+                <div class="legend">Sample1</div>
+                <a href="{0}"><img src="{0}" /></a>
+                <div class="legend">male</div>
+            </div>
 
+            <div class="col-sm-3 thumbnail figure">
+                <div class="legend">Sample2</div>
+                <a href="{0}"><img src="{0}" /></a>
+                <div class="legend">female</div>
+            </div>
+
+            <div class="col-sm-3 thumbnail figure">
+                <div class="legend">Sample3</div>
+                <a href="{0}"><img src="{0}" /></a>
+                <div class="legend">male</div>
+            </div>
+
+    </div>""".format(test_imgB64))
+
+test_report = dedent("""\
+    # The title of the report
+
+    This is a test report
+
+    Lorem ipsum dolor sit amet, alii noluisse vim no, mazim mediocritatem
+    quo et, vis modo forensibus interpretaris ea. Et sea probatus atomorum
+    mediocrem, ex mei saperet percipit. Nec vitae aeterno maiestatis ea,
+    eripuit instructior ex vel. Est ad legere everti deseruisse, usu
+    feugiat pertinax ut, pri dicam omnesque epicurei ut.
+
+    Exerci laudem option pri te, vix modus inani signiferumque an, magna
+    conclusionemque has ex. Vitae graeco quo ex, labore qualisque vel in, at mei
+    eius nihil postea. Eum iudico audire eligendi ea, at eam malis aliquip. Vix at
+    feugiat postulant ullamcorper, ius no prodesset repudiandae. Hendrerit
+    complectitur mea ex.
+
+    ## Section 1
+
+    Exerci laudem option pri te, vix modus inani signiferumque an, magna
+    conclusionemque has ex. Vitae graeco quo ex, labore qualisque vel in, at mei
+    eius nihil postea. Eum iudico audire eligendi ea, at eam malis aliquip. Vix at
+    feugiat postulant ullamcorper, ius no prodesset repudiandae. Hendrerit
+    complectitur mea ex.
+
+    {Panel1}
+
+    ## Section 2
+
+    ### Sub section 2.1
+
+    {Image1}
+
+    Exerci laudem option pri te, vix modus inani signiferumque an, magna
+    conclusionemque has ex. Vitae graeco quo ex, labore qualisque vel in, at mei
+    eius nihil postea. Eum iudico audire eligendi ea, at eam malis aliquip. Vix at
+    feugiat postulant ullamcorper, ius no prodesset repudiandae. Hendrerit
+    complectitur mea ex.
+
+    {Table1}
+
+    ### Sub section 2.2
+
+    Bulleted list
+
+    * one
+    * two
+    * thee
+
+    Sed sumo posse liberavisse ex. Eu ponderum neglegentur cum, ius eu tractatos
+    partiendo. Albucius explicari vim et. Id maluisset argumentum vim. Ex mei summo
+    conceptam, ut adipisci dignissim disputando per. At detracto intellegebat vim,
+    mea nihil everti at. Wisi error vis no, pri choro ceteros ne.
+
+    ### Sub section 2.3
+
+    Exerci laudem option pri te, vix modus inani signiferumque an, magna
+    conclusionemque has ex. Vitae graeco quo ex, labore qualisque vel in, at mei
+    eius nihil postea. Eum iudico audire eligendi ea, at eam malis aliquip. Vix at
+    feugiat postulant ullamcorper, ius no prodesset repudiandae. Hendrerit
+    complectitur mea ex.""")
+
+test_table = pd.DataFrame({'sampleID': ['treated1', 'treated2'], 
+                           'treatment': ['trt1', 'trt2'], 
+                           'replicate': ['1', '2']
+                           })[['sampleID', 'treatment', 'replicate']]
 
 def renderHtml(string):
         from lcdb.reporting import ENV
@@ -59,7 +153,7 @@ def renderHtml(string):
 
 class TestReportImage(unittest.TestCase):
     def setUp(self):
-        self.imageFile, _ = urlretrieve(imgURL)
+        self.imageFile, _ = urlretrieve(test_imgURL)
 
     def tearDown(self):
         os.unlink(self.imageFile)
@@ -67,12 +161,12 @@ class TestReportImage(unittest.TestCase):
     def test_Image(self):
         from lcdb.reporting import Image
         img = Image(self.imageFile)
-        self.assertEqual(str(img), imgB64)
+        self.assertEqual(str(img), test_imgB64)
 
 
 class TestReportPanel(unittest.TestCase):
     def setUp(self):
-        self.imageFile, _ = urlretrieve(imgURL)
+        self.imageFile, _ = urlretrieve(test_imgURL)
 
     def tearDown(self):
         os.unlink(self.imageFile)
@@ -83,88 +177,30 @@ class TestReportPanel(unittest.TestCase):
         img2 = Image(self.imageFile, name='Sample2', caption='female')
         img3 = Image(self.imageFile, name='Sample3', caption='male')
 
-        examplePanel = dedent("""\
-        <div class="row">
-            <div class="legend">Row caption</div>
- 
-                <div class="col-sm-3 thumbnail figure">
-                    <div class="legend">Sample1</div>
-                    <a href="{0}"><img src="{0}" /></a>
-                    <div class="legend">male</div>
-                </div>
- 
-                <div class="col-sm-3 thumbnail figure">
-                    <div class="legend">Sample2</div>
-                    <a href="{0}"><img src="{0}" /></a>
-                    <div class="legend">female</div>
-                </div>
- 
-                <div class="col-sm-3 thumbnail figure">
-                    <div class="legend">Sample3</div>
-                    <a href="{0}"><img src="{0}" /></a>
-                    <div class="legend">male</div>
-                </div>
- 
-        </div><div class="row">
-            <div class="legend">Row caption2</div>
-    
-                <div class="col-sm-3 thumbnail figure">
-                    <div class="legend">Sample1</div>
-                    <a href="{0}"><img src="{0}" /></a>
-                    <div class="legend">male</div>
-                </div>
- 
-                <div class="col-sm-3 thumbnail figure">
-                    <div class="legend">Sample2</div>
-                    <a href="{0}"><img src="{0}" /></a>
-                    <div class="legend">female</div>
-                </div>
- 
-                <div class="col-sm-3 thumbnail figure">
-                    <div class="legend">Sample3</div>
-                    <a href="{0}"><img src="{0}" /></a>
-                    <div class="legend">male</div>
-                </div>
-
-        </div>""".format(str(img1)))
-
         table = JinjaPanel()
         table.add_row([img1, img2, img3], caption='Row caption')
         table.add_row([img1, img2, img3], caption='Row caption2')
-        self.assertEqual(dedent(table.panel), examplePanel)
+        self.assertEqual(table.panel, test_imagePanel)
 
 
-class TestReportText(unittest.TestCase):
+class Test_report(unittest.TestCase):
     def setUp(self):
         pass
 
     def tearDown(self):
         pass
 
-    def test_initialize(self):
-        from lcdb.reporting import Text
-        txt = Text(mdownText)
+    def test_report(self):
+        from lcdb.reporting import report
 
-        exampleHtml = dedent("""\
-                <h1>Heading Level 1</h1>
-                <p>This is just a test text document that will be translated into HTML
-                upon rendering. <em>Some example italics</em> and maybe some <strong>bold</strong>. </p>
-                <ul>
-                <li>simple bullets 1</li>
-                <li>simple bullets 2</li>
-                <li>simple bullets 3</li>
-                </ul>
-                <h2>Heading Level 2</h2>
-                <ol>
-                <li>now some numbers</li>
-                <li>now some numbers</li>
-                <li>now some numbers</li>
-                </ol>
-                <h3>Heading level 3</h3>
-                <p>Some more text.</p>""")
 
-        self.assertEqual(dedent(txt.html), exampleHtml)
+        values = {'Panel1': dedent(test_imagePanel),
+                  'Image1': dedent(test_imgB64_html),
+                  'Table1': test_table.to_html(index=False, classes='table table-striped')
+                }
 
+        with open('tmp_render.html', 'w') as OUT:
+            OUT.write(report(test_report, **values))
 
 if __name__ == '__main__':
     unittest.main()
