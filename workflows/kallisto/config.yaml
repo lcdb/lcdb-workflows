@@ -26,7 +26,7 @@ references:
   -
     assembly: 'dm6'
     type: 'gtf'
-    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/gtf/dmel-all-r6.11.gtf.gz'
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.11_FB2016_03/gtf/dmel-all-r6.11.gtf.gz'
     postprocess: "dm6.gtf_postprocess"
     tag: 'r6-11'
     conversions:
@@ -35,6 +35,6 @@ references:
     assembly: 'dm6'
     type: 'fasta'
     tag: 'r6-11_transcriptome'
-    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/current/fasta/dmel-all-transcript-r6.11.fasta.gz'
+    url: 'ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.11_FB2016_03/fasta/dmel-all-transcript-r6.11.fasta.gz'
     indexes:
       - 'kallisto'
