@@ -90,6 +90,7 @@ patterns = [
     '{runLevel}.cutadapt.{aligner_tag}.unique.sort.dedup.metrics',
     '{aggLevel}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam',
     '{aggLevel}.cutadapt.{aligner_tag}.merged.unique.sort.dedup.bam.count',
+    'report.html',
     'multiqc_report.html',
     'fastq_screen_config.txt',
 ] + fastq_screen_config_inputs() + ALIGNER_INDEX
@@ -268,24 +269,55 @@ rule bam_count:
     output: '{prefix}.bam.count'
     shell: "samtools view -c {input[0]} > {output[0]}"
 
+rule sample_count_table:
+    input: fq = '{prefix}.fastq.count',
+           cutadapt = '{prefix}.cutadapt.fastq.count',
+           align = '{prefix}.cutadapt.ht2.bam.count',
+           dedup = '{prefix}.cutadapt.ht2.unique.sort.dedup.bam.count'
+    output: '{prefix}_counts.csv',
+    run:
+        import pandas as pd
+        def read_count(count):
+            with open(count, 'r') as FH:
+                return int(FH.read().strip())
+        
+        fq = read_count(input.fq)
+        cutadapt = read_count(input.cutadapt)
+        align = read_count(input.align)
+        dedup = read_count(input.dedup)
+
+        df = pd.DataFrame([[wildcards.prefix, fq, cutadapt, align, dedup]], columns=['sampleID', 'Number Reads', 'Number Trimmed Reads', 'Number Aligned', 'Number Uniquely Aligned'])
+        df.to_csv(output[0], index=False)
 
 rule count_table:
-    input: 
+    input: SH.build_targets(['{runLevel}_counts.csv'])
     output: csv = 'count_table.csv',
             html = 'count_table.html'
     run:
         import pandas as pd
-        
 
+        dfs = [pd.read_csv(x) for x in input]
+        df = pd.concat(dfs)
+        df.to_csv(output.csv, index=False)
+        with open(output.html, 'w') as OUT:
+            df.to_html(buf=OUT, index=False, classes='table table-striped')
 
 rule report:
-    input: F1='img.png'
+    input: Table1='count_table.html'
     output: html='report.html'
     run:
-        from lcdb.reporting import report
-        
-        report("""\
-        # Mapping Workflow Report
+        from reporting import report
 
-        """,  **input)
+        myIn = {}
+        with open(input.Table1, 'r') as FH:
+            myIn['Table1'] = FH.read().strip()
+        
+        with open(output.html, 'w') as OUT:
+            OUT.write(report("""\
+                    # Mapping Workflow Report
+
+                    ## Alignment Results
+                    {Table1}
+                    
+                    """,  **myIn))
 

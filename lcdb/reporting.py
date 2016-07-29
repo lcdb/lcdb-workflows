@@ -17,7 +17,7 @@ def report(string, **kwargs):
     """ Build a report """
     md = markdown.Markdown(output_format='html5')
     tp = ENV.get_template('base.html')
-    return tp.render(content=md.convert(dedent(string.format(**kwargs))))
+    return tp.render(content=md.convert(dedent(string).format(**kwargs)))
 
 
 class Report(object):
