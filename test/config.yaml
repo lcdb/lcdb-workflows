@@ -1,0 +1,86 @@
+#### General Settings ####
+# location of system level settings
+settings:
+  title: My Very Cool Project
+  Author: Bob
+
+  # path like settings
+  data: /data/bob/original_data
+
+  # conda environment names
+  python2: py2.7
+
+  # names to access specific envs by
+  env: HOME
+
+#### Experiment Level Settings ####
+# experiment level settings, settings that apply to all samples
+exp.settings:
+
+  # Sample information relating sample specific settings to sample ids
+  sampleinfo: sample_metadata.csv
+
+  # it would be nice to be able define a setting here that applies to all
+  # samples, or define for each sample in the sampleinfo table case they are
+  # different.
+  fastq_suffix: '.fastq.gz'
+  # Need to some way to specify annotation to use, maybe here is not the best
+  # place.
+  annotation:
+    genic: /data/...
+    transcript: /data/....
+    intergenic: /data/...
+  # add modeling information here
+  models:
+    formula: ~ sex + tissue + time
+    # tell which columns in sample table should be treated like factors
+    factors:
+      - sex
+      - tissue
+      - time
+
+#### Workflow Settings ####
+# I think using a naming scheme that follow folder structure would be useful.
+# For example: if there is a workflows folder then we could define workflow
+# specific settings
+workflows.qc:
+  # List pieces of the pipeline to run, (or not run may be better)
+  steps_to_run:
+      - fastqc
+      - rseqc
+  # or could have logical operators switches to change workflow behavior
+  trim: True
+
+workflows.align:
+  # define what software to use and optionally what version
+  aligner: 'tophat2=2.1.0'
+  aggregated_output_dir: /data/...
+  report_output_dir: /data/...
+
+workflow.rnaseq: ...
+
+workflows.references: ...
+
+#### Rule Specific Settings ####
+# rule level settings again with naming based on folder structure if we need
+# folder structure
+rules.align.bowtie2:
+  # It would be nice to be able to have cluster settings with rule setting,
+  # can't think of a way to get this to work, probably just need a separate
+  # cluster config.
+  cluster:
+      threads: 16
+      mem: 60g
+      walltime: 8:00:00
+    # bowtie index prefix
+    index: /data/...
+    # Access to any parameters that need set
+    params:
+      # place to change the options
+      options: -p 16 -k 8
+
+    # place to change how files are named
+    aln_suffix: '.bt2.bam'
+    log_suffix: '.bt2.log'
+
+# vim: sw=2 ts=2
