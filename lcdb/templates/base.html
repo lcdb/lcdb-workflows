@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <title>{% block title %}{% endblock %}</title>
+
+        <!-- Bootstrap -->
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link href="static/css/dashboard.css" rel="stylesheet">
+
+        <!-- Bokeh CSS -->
+        <link rel="stylesheet" href="static/css/bokeh-0.11.1.min.css" type="text/css" />
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.jst">
+        <script src="static/js/bokeh-0.11.1.min.js"></script>
+
+        <!-- Bokeh Scripts go here -->
+        {% block bokeh %}{% endblock %}
+
+    </head>
+    <body>
+        {%block navbar %}{% endblock %}
+        <div class="container-fluid">
+            <div id="content">
+                {% block content %}{% endblock %}
+                {{ content }}
+            </div>
+            <div id="footer">
+                {% block footer %}
+                &copy; Copyright 2016 by LCDB
+                {% endblock %}
+            </div>
+        </div>
+    </body>
+</html>
